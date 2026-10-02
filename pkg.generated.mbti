@@ -1,14 +1,140 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "yadidyc/hostsentinel"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn project_name() -> String
 
 pub fn version() -> String
 
 // Errors
+pub(all) suberror DomainError {
+  EmptyHostId
+  EmptyEventId
+  EmptyHostname
+  InvalidTimestamp
+} derive(Eq, @debug.Debug)
+pub fn DomainError::equal(Self, Self) -> Bool
+pub fn DomainError::not_equal(Self, Self) -> Bool
+pub fn DomainError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub struct EventId {
+  value : String
+} derive(Eq, @debug.Debug)
+pub fn EventId::as_string(Self) -> String
+pub fn EventId::equal(Self, Self) -> Bool
+pub fn EventId::new(value~ : String) -> Self raise DomainError
+pub fn EventId::not_equal(Self, Self) -> Bool
+pub fn EventId::to_repr(Self) -> @debug.Repr
+
+pub(all) enum EventKind {
+  Process
+  File
+  Network
+  Authentication
+  Persistence
+} derive(Eq, @debug.Debug)
+pub fn EventKind::equal(Self, Self) -> Bool
+pub fn EventKind::not_equal(Self, Self) -> Bool
+pub fn EventKind::to_repr(Self) -> @debug.Repr
+
+pub(all) enum EventSource {
+  Agent
+  Sysmon
+  Auditd
+  WindowsEvent
+  Manual
+  Other(String)
+} derive(Eq, @debug.Debug)
+pub fn EventSource::equal(Self, Self) -> Bool
+pub fn EventSource::not_equal(Self, Self) -> Bool
+pub fn EventSource::to_repr(Self) -> @debug.Repr
+
+pub struct Host {
+  id : HostId
+  hostname : String
+  platform : HostPlatform
+  state : HostState
+} derive(Eq, @debug.Debug)
+pub fn Host::equal(Self, Self) -> Bool
+pub fn Host::hostname(Self) -> String
+pub fn Host::id(Self) -> HostId
+pub fn Host::new(id~ : HostId, hostname~ : String, platform~ : HostPlatform) -> Self raise DomainError
+pub fn Host::not_equal(Self, Self) -> Bool
+pub fn Host::platform(Self) -> HostPlatform
+pub fn Host::state(Self) -> HostState
+pub fn Host::to_repr(Self) -> @debug.Repr
+
+pub struct HostId {
+  value : String
+} derive(Eq, @debug.Debug)
+pub fn HostId::as_string(Self) -> String
+pub fn HostId::equal(Self, Self) -> Bool
+pub fn HostId::new(value~ : String) -> Self raise DomainError
+pub fn HostId::not_equal(Self, Self) -> Bool
+pub fn HostId::to_repr(Self) -> @debug.Repr
+
+pub(all) enum HostPlatform {
+  Windows
+  Linux
+  MacOS
+  Other(String)
+} derive(Eq, @debug.Debug)
+pub fn HostPlatform::equal(Self, Self) -> Bool
+pub fn HostPlatform::not_equal(Self, Self) -> Bool
+pub fn HostPlatform::to_repr(Self) -> @debug.Repr
+
+pub(all) enum HostState {
+  Active
+  Isolated
+  Retired
+} derive(Eq, @debug.Debug)
+pub fn HostState::equal(Self, Self) -> Bool
+pub fn HostState::not_equal(Self, Self) -> Bool
+pub fn HostState::to_repr(Self) -> @debug.Repr
+
+pub struct ObservedAt {
+  unix_seconds : Int64
+} derive(Eq, @debug.Debug)
+pub fn ObservedAt::equal(Self, Self) -> Bool
+pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise DomainError
+pub fn ObservedAt::not_equal(Self, Self) -> Bool
+pub fn ObservedAt::to_repr(Self) -> @debug.Repr
+pub fn ObservedAt::unix_seconds(Self) -> Int64
+
+pub struct SecurityEvent {
+  id : EventId
+  host_id : HostId
+  kind : EventKind
+  source : EventSource
+  severity : Severity
+  observed_at : ObservedAt
+} derive(Eq, @debug.Debug)
+pub fn SecurityEvent::equal(Self, Self) -> Bool
+pub fn SecurityEvent::host_id(Self) -> HostId
+pub fn SecurityEvent::id(Self) -> EventId
+pub fn SecurityEvent::kind(Self) -> EventKind
+pub fn SecurityEvent::new(id~ : EventId, host_id~ : HostId, kind~ : EventKind, source~ : EventSource, severity~ : Severity, observed_at~ : ObservedAt) -> Self
+pub fn SecurityEvent::not_equal(Self, Self) -> Bool
+pub fn SecurityEvent::observed_at(Self) -> ObservedAt
+pub fn SecurityEvent::severity(Self) -> Severity
+pub fn SecurityEvent::source(Self) -> EventSource
+pub fn SecurityEvent::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Severity {
+  Informational
+  Low
+  Medium
+  High
+  Critical
+} derive(Eq, @debug.Debug)
+pub fn Severity::equal(Self, Self) -> Bool
+pub fn Severity::not_equal(Self, Self) -> Bool
+pub fn Severity::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
