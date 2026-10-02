@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn correlate(CorrelationPattern, Array[EventObservation]) -> Array[Detection]
+
 pub fn evaluate_rule(Rule, NormalizedEvent, Array[String]) -> RuleHit?
 
 pub fn evaluate_rules(Array[Rule], NormalizedEvent, Array[String]) -> Array[RuleHit]
@@ -21,6 +23,17 @@ pub fn project_name() -> String
 pub fn version() -> String
 
 // Errors
+pub(all) suberror CorrelationError {
+  EmptyPatternId
+  EmptyPatternName
+  EmptyRuleSequence
+  EmptyRuleId
+  InvalidWindow
+} derive(Eq, @debug.Debug)
+pub fn CorrelationError::equal(Self, Self) -> Bool
+pub fn CorrelationError::not_equal(Self, Self) -> Bool
+pub fn CorrelationError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror DomainError {
   EmptyHostId
   EmptyEventId
@@ -61,6 +74,41 @@ pub fn RuleError::not_equal(Self, Self) -> Bool
 pub fn RuleError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub struct CorrelationPattern {
+  id : String
+  name : String
+  rule_ids : Array[String]
+  window_seconds : Int64
+} derive(Eq, @debug.Debug)
+pub fn CorrelationPattern::equal(Self, Self) -> Bool
+pub fn CorrelationPattern::id(Self) -> String
+pub fn CorrelationPattern::name(Self) -> String
+pub fn CorrelationPattern::new(id~ : String, name~ : String, rule_ids~ : Array[String], window_seconds~ : Int64) -> Self raise CorrelationError
+pub fn CorrelationPattern::not_equal(Self, Self) -> Bool
+pub fn CorrelationPattern::rule_ids(Self) -> Array[String]
+pub fn CorrelationPattern::to_repr(Self) -> @debug.Repr
+pub fn CorrelationPattern::window_seconds(Self) -> Int64
+
+pub struct Detection {
+  pattern_id : String
+  host_id : HostId
+  rule_ids : Array[String]
+  event_fingerprints : Array[String]
+  started_at : ObservedAt
+  ended_at : ObservedAt
+  dedup_key : String
+} derive(Eq, @debug.Debug)
+pub fn Detection::dedup_key(Self) -> String
+pub fn Detection::ended_at(Self) -> ObservedAt
+pub fn Detection::equal(Self, Self) -> Bool
+pub fn Detection::event_fingerprints(Self) -> Array[String]
+pub fn Detection::host_id(Self) -> HostId
+pub fn Detection::not_equal(Self, Self) -> Bool
+pub fn Detection::pattern_id(Self) -> String
+pub fn Detection::rule_ids(Self) -> Array[String]
+pub fn Detection::started_at(Self) -> ObservedAt
+pub fn Detection::to_repr(Self) -> @debug.Repr
+
 pub struct EventId {
   value : String
 } derive(Eq, @debug.Debug)
@@ -80,6 +128,17 @@ pub(all) enum EventKind {
 pub fn EventKind::equal(Self, Self) -> Bool
 pub fn EventKind::not_equal(Self, Self) -> Bool
 pub fn EventKind::to_repr(Self) -> @debug.Repr
+
+pub struct EventObservation {
+  event : NormalizedEvent
+  hits : Array[RuleHit]
+} derive(Eq, @debug.Debug)
+pub fn EventObservation::equal(Self, Self) -> Bool
+pub fn EventObservation::event(Self) -> NormalizedEvent
+pub fn EventObservation::hits(Self) -> Array[RuleHit]
+pub fn EventObservation::new(event~ : NormalizedEvent, hits~ : Array[RuleHit]) -> Self
+pub fn EventObservation::not_equal(Self, Self) -> Bool
+pub fn EventObservation::to_repr(Self) -> @debug.Repr
 
 pub(all) enum EventSource {
   Agent

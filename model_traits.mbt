@@ -124,3 +124,27 @@ pub extend RuleHit with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend RuleHit with Eq::{not_equal, equal}
+
+///|
+pub extend CorrelationError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend CorrelationError with Eq::{not_equal, equal}
+
+///|
+pub extend CorrelationPattern with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend CorrelationPattern with Eq::{not_equal, equal}
+
+///|
+pub extend EventObservation with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend EventObservation with Eq::{not_equal, equal}
+
+///|
+pub extend Detection with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Detection with Eq::{not_equal, equal}
