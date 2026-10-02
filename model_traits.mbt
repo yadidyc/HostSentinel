@@ -76,3 +76,27 @@ pub extend NormalizedEvent with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend NormalizedEvent with Eq::{not_equal, equal}
+
+///|
+pub extend IocKind with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend IocKind with Eq::{not_equal, equal}
+
+///|
+pub extend IocError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend IocError with Eq::{not_equal, equal}
+
+///|
+pub extend Indicator with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Indicator with Eq::{not_equal, equal}
+
+///|
+pub extend IocMatch with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend IocMatch with Eq::{not_equal, equal}

@@ -6,6 +6,10 @@ import {
 }
 
 // Values
+pub fn match_ioc(Indicator, String) -> IocMatch?
+
+pub fn match_iocs(Array[Indicator], String) -> Array[IocMatch]
+
 pub fn normalize_jsonl(String) -> Array[NormalizedEvent] raise NormalizationError
 
 pub fn project_name() -> String
@@ -22,6 +26,14 @@ pub(all) suberror DomainError {
 pub fn DomainError::equal(Self, Self) -> Bool
 pub fn DomainError::not_equal(Self, Self) -> Bool
 pub fn DomainError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror IocError {
+  EmptyValue(kind~ : IocKind)
+  InvalidFileHash(value~ : String)
+} derive(Eq, @debug.Debug)
+pub fn IocError::equal(Self, Self) -> Bool
+pub fn IocError::not_equal(Self, Self) -> Bool
+pub fn IocError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror NormalizationError {
   InvalidJson(line_number~ : Int, line~ : String)
@@ -108,6 +120,40 @@ pub(all) enum HostState {
 pub fn HostState::equal(Self, Self) -> Bool
 pub fn HostState::not_equal(Self, Self) -> Bool
 pub fn HostState::to_repr(Self) -> @debug.Repr
+
+pub struct Indicator {
+  kind : IocKind
+  value : String
+} derive(Eq, @debug.Debug)
+pub fn Indicator::equal(Self, Self) -> Bool
+pub fn Indicator::kind(Self) -> IocKind
+pub fn Indicator::matches(Self, String) -> Bool
+pub fn Indicator::new(kind~ : IocKind, value~ : String) -> Self raise IocError
+pub fn Indicator::not_equal(Self, Self) -> Bool
+pub fn Indicator::to_repr(Self) -> @debug.Repr
+pub fn Indicator::value(Self) -> String
+
+pub(all) enum IocKind {
+  IpAddress
+  Domain
+  Url
+  FileHash
+  FilePath
+  ProcessName
+} derive(Eq, @debug.Debug)
+pub fn IocKind::equal(Self, Self) -> Bool
+pub fn IocKind::not_equal(Self, Self) -> Bool
+pub fn IocKind::to_repr(Self) -> @debug.Repr
+
+pub struct IocMatch {
+  indicator : Indicator
+  candidate : String
+} derive(Eq, @debug.Debug)
+pub fn IocMatch::candidate(Self) -> String
+pub fn IocMatch::equal(Self, Self) -> Bool
+pub fn IocMatch::indicator(Self) -> Indicator
+pub fn IocMatch::not_equal(Self, Self) -> Bool
+pub fn IocMatch::to_repr(Self) -> @debug.Repr
 
 pub struct NormalizedEvent {
   line_number : Int
