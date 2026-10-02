@@ -100,3 +100,27 @@ pub extend IocMatch with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend IocMatch with Eq::{not_equal, equal}
+
+///|
+pub extend RuleCondition with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend RuleCondition with Eq::{not_equal, equal}
+
+///|
+pub extend RuleError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend RuleError with Eq::{not_equal, equal}
+
+///|
+pub extend Rule with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Rule with Eq::{not_equal, equal}
+
+///|
+pub extend RuleHit with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend RuleHit with Eq::{not_equal, equal}

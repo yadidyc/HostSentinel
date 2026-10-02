@@ -6,6 +6,10 @@ import {
 }
 
 // Values
+pub fn evaluate_rule(Rule, NormalizedEvent, Array[String]) -> RuleHit?
+
+pub fn evaluate_rules(Array[Rule], NormalizedEvent, Array[String]) -> Array[RuleHit]
+
 pub fn match_ioc(Indicator, String) -> IocMatch?
 
 pub fn match_iocs(Array[Indicator], String) -> Array[IocMatch]
@@ -44,6 +48,17 @@ pub(all) suberror NormalizationError {
 pub fn NormalizationError::equal(Self, Self) -> Bool
 pub fn NormalizationError::not_equal(Self, Self) -> Bool
 pub fn NormalizationError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror RuleError {
+  EmptyRuleId
+  EmptyRuleName
+  EmptyDescription
+  InvalidVersion
+  EmptyConditionGroup
+} derive(Eq, @debug.Debug)
+pub fn RuleError::equal(Self, Self) -> Bool
+pub fn RuleError::not_equal(Self, Self) -> Bool
+pub fn RuleError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct EventId {
@@ -179,6 +194,50 @@ pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise Domain
 pub fn ObservedAt::not_equal(Self, Self) -> Bool
 pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
+
+pub struct Rule {
+  id : String
+  name : String
+  description : String
+  version : Int
+  condition : RuleCondition
+} derive(Eq, @debug.Debug)
+pub fn Rule::condition(Self) -> RuleCondition
+pub fn Rule::description(Self) -> String
+pub fn Rule::equal(Self, Self) -> Bool
+pub fn Rule::id(Self) -> String
+pub fn Rule::name(Self) -> String
+pub fn Rule::new(id~ : String, name~ : String, description~ : String, version~ : Int, condition~ : RuleCondition) -> Self raise RuleError
+pub fn Rule::not_equal(Self, Self) -> Bool
+pub fn Rule::to_repr(Self) -> @debug.Repr
+pub fn Rule::version(Self) -> Int
+
+pub(all) enum RuleCondition {
+  EventKindIs(EventKind)
+  HostPlatformIs(HostPlatform)
+  SourceIs(EventSource)
+  SeverityAtLeast(Severity)
+  IocIs(Indicator)
+  All(Array[RuleCondition])
+  Any(Array[RuleCondition])
+} derive(Eq, @debug.Debug)
+pub fn RuleCondition::equal(Self, Self) -> Bool
+pub fn RuleCondition::not_equal(Self, Self) -> Bool
+pub fn RuleCondition::to_repr(Self) -> @debug.Repr
+
+pub struct RuleHit {
+  rule_id : String
+  rule_version : Int
+  event_fingerprint : String
+  evidence : Array[String]
+} derive(Eq, @debug.Debug)
+pub fn RuleHit::equal(Self, Self) -> Bool
+pub fn RuleHit::event_fingerprint(Self) -> String
+pub fn RuleHit::evidence(Self) -> Array[String]
+pub fn RuleHit::not_equal(Self, Self) -> Bool
+pub fn RuleHit::rule_id(Self) -> String
+pub fn RuleHit::rule_version(Self) -> Int
+pub fn RuleHit::to_repr(Self) -> @debug.Repr
 
 pub struct SecurityEvent {
   id : EventId
