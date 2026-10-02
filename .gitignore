@@ -1,0 +1,8 @@
+.DS_Store
+_build/
+target/
+.mooncakes/
+.moonagent/
+.repos/
+.env
+secrets/

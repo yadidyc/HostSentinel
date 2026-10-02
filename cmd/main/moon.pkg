@@ -1,0 +1,5 @@
+import {
+  "yadidyc/hostsentinel" @core,
+}
+
+pkgtype(kind: "executable")
