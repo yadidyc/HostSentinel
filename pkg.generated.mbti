@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn normalize_jsonl(String) -> Array[NormalizedEvent] raise NormalizationError
+
 pub fn project_name() -> String
 
 pub fn version() -> String
@@ -20,6 +22,16 @@ pub(all) suberror DomainError {
 pub fn DomainError::equal(Self, Self) -> Bool
 pub fn DomainError::not_equal(Self, Self) -> Bool
 pub fn DomainError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror NormalizationError {
+  InvalidJson(line_number~ : Int, line~ : String)
+  ExpectedObject(line_number~ : Int, line~ : String)
+  MissingField(line_number~ : Int, field~ : String)
+  InvalidField(line_number~ : Int, field~ : String, value~ : String)
+} derive(Eq, @debug.Debug)
+pub fn NormalizationError::equal(Self, Self) -> Bool
+pub fn NormalizationError::not_equal(Self, Self) -> Bool
+pub fn NormalizationError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct EventId {
@@ -96,6 +108,22 @@ pub(all) enum HostState {
 pub fn HostState::equal(Self, Self) -> Bool
 pub fn HostState::not_equal(Self, Self) -> Bool
 pub fn HostState::to_repr(Self) -> @debug.Repr
+
+pub struct NormalizedEvent {
+  line_number : Int
+  raw_line : String
+  host : Host
+  event : SecurityEvent
+  fingerprint : String
+} derive(Eq, @debug.Debug)
+pub fn NormalizedEvent::equal(Self, Self) -> Bool
+pub fn NormalizedEvent::event(Self) -> SecurityEvent
+pub fn NormalizedEvent::fingerprint(Self) -> String
+pub fn NormalizedEvent::host(Self) -> Host
+pub fn NormalizedEvent::line_number(Self) -> Int
+pub fn NormalizedEvent::not_equal(Self, Self) -> Bool
+pub fn NormalizedEvent::raw_line(Self) -> String
+pub fn NormalizedEvent::to_repr(Self) -> @debug.Repr
 
 pub struct ObservedAt {
   unix_seconds : Int64

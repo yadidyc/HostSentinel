@@ -64,3 +64,15 @@ pub extend SecurityEvent with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend SecurityEvent with Eq::{not_equal, equal}
+
+///|
+pub extend NormalizationError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend NormalizationError with Eq::{not_equal, equal}
+
+///|
+pub extend NormalizedEvent with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend NormalizedEvent with Eq::{not_equal, equal}
