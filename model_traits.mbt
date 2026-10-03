@@ -148,3 +148,33 @@ pub extend Detection with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend Detection with Eq::{not_equal, equal}
+
+///|
+pub extend RiskLevel with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend RiskLevel with Eq::{not_equal, equal}
+
+///|
+pub extend RiskScore with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend RiskScore with Eq::{not_equal, equal}
+
+///|
+pub extend AlertStatus with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend AlertStatus with Eq::{not_equal, equal}
+
+///|
+pub extend AlertError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend AlertError with Eq::{not_equal, equal}
+
+///|
+pub extend Alert with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Alert with Eq::{not_equal, equal}

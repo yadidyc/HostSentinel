@@ -20,9 +20,20 @@ pub fn normalize_jsonl(String) -> Array[NormalizedEvent] raise NormalizationErro
 
 pub fn project_name() -> String
 
+pub fn score_detection(Detection, Array[EventObservation]) -> RiskScore
+
 pub fn version() -> String
 
 // Errors
+pub(all) suberror AlertError {
+  EmptyAlertId
+  InvalidTransition(from~ : AlertStatus, to~ : AlertStatus)
+  StaleTimestamp
+} derive(Eq, @debug.Debug)
+pub fn AlertError::equal(Self, Self) -> Bool
+pub fn AlertError::not_equal(Self, Self) -> Bool
+pub fn AlertError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror CorrelationError {
   EmptyPatternId
   EmptyPatternName
@@ -74,6 +85,37 @@ pub fn RuleError::not_equal(Self, Self) -> Bool
 pub fn RuleError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub struct Alert {
+  id : String
+  detection : Detection
+  score : RiskScore
+  status : AlertStatus
+  created_at : ObservedAt
+  updated_at : ObservedAt
+} derive(Eq, @debug.Debug)
+pub fn Alert::created_at(Self) -> ObservedAt
+pub fn Alert::detection(Self) -> Detection
+pub fn Alert::equal(Self, Self) -> Bool
+pub fn Alert::id(Self) -> String
+pub fn Alert::new(id~ : String, detection~ : Detection, score~ : RiskScore, created_at~ : ObservedAt) -> Self raise AlertError
+pub fn Alert::not_equal(Self, Self) -> Bool
+pub fn Alert::score(Self) -> RiskScore
+pub fn Alert::status(Self) -> AlertStatus
+pub fn Alert::to_repr(Self) -> @debug.Repr
+pub fn Alert::transition(Self, status~ : AlertStatus, at~ : ObservedAt) -> Self raise AlertError
+pub fn Alert::updated_at(Self) -> ObservedAt
+
+pub(all) enum AlertStatus {
+  Open
+  Acknowledged
+  InProgress
+  Resolved
+  Suppressed
+} derive(Eq, @debug.Debug)
+pub fn AlertStatus::equal(Self, Self) -> Bool
+pub fn AlertStatus::not_equal(Self, Self) -> Bool
+pub fn AlertStatus::to_repr(Self) -> @debug.Repr
+
 pub struct CorrelationPattern {
   id : String
   name : String
@@ -253,6 +295,29 @@ pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise Domain
 pub fn ObservedAt::not_equal(Self, Self) -> Bool
 pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
+
+pub(all) enum RiskLevel {
+  Informational
+  Low
+  Medium
+  High
+  Critical
+} derive(Eq, @debug.Debug)
+pub fn RiskLevel::equal(Self, Self) -> Bool
+pub fn RiskLevel::not_equal(Self, Self) -> Bool
+pub fn RiskLevel::to_repr(Self) -> @debug.Repr
+
+pub struct RiskScore {
+  value : Int
+  level : RiskLevel
+  max_severity : Severity
+} derive(Eq, @debug.Debug)
+pub fn RiskScore::equal(Self, Self) -> Bool
+pub fn RiskScore::level(Self) -> RiskLevel
+pub fn RiskScore::max_severity(Self) -> Severity
+pub fn RiskScore::not_equal(Self, Self) -> Bool
+pub fn RiskScore::to_repr(Self) -> @debug.Repr
+pub fn RiskScore::value(Self) -> Int
 
 pub struct Rule {
   id : String
