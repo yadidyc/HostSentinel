@@ -178,3 +178,33 @@ pub extend Alert with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend Alert with Eq::{not_equal, equal}
+
+///|
+pub extend EvidenceKind with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend EvidenceKind with Eq::{not_equal, equal}
+
+///|
+pub extend CaseError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend CaseError with Eq::{not_equal, equal}
+
+///|
+pub extend Evidence with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Evidence with Eq::{not_equal, equal}
+
+///|
+pub extend AuditEntry with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend AuditEntry with Eq::{not_equal, equal}
+
+///|
+pub extend Case with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Case with Eq::{not_equal, equal}

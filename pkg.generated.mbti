@@ -34,6 +34,22 @@ pub fn AlertError::equal(Self, Self) -> Bool
 pub fn AlertError::not_equal(Self, Self) -> Bool
 pub fn AlertError::to_repr(Self) -> @debug.Repr
 
+pub(all) suberror CaseError {
+  EmptyCaseId
+  EmptyEvidenceId
+  EmptyEvidenceSummary
+  EmptyEvidenceSource
+  EmptyEvidenceReference
+  EmptyActor
+  EmptyAction
+  InvalidSequence
+  DuplicateEvidenceId
+  StaleTimestamp
+} derive(Eq, @debug.Debug)
+pub fn CaseError::equal(Self, Self) -> Bool
+pub fn CaseError::not_equal(Self, Self) -> Bool
+pub fn CaseError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror CorrelationError {
   EmptyPatternId
   EmptyPatternName
@@ -116,6 +132,40 @@ pub fn AlertStatus::equal(Self, Self) -> Bool
 pub fn AlertStatus::not_equal(Self, Self) -> Bool
 pub fn AlertStatus::to_repr(Self) -> @debug.Repr
 
+pub struct AuditEntry {
+  sequence : Int
+  actor : String
+  action : String
+  details : String
+  occurred_at : ObservedAt
+} derive(Eq, @debug.Debug)
+pub fn AuditEntry::action(Self) -> String
+pub fn AuditEntry::actor(Self) -> String
+pub fn AuditEntry::details(Self) -> String
+pub fn AuditEntry::equal(Self, Self) -> Bool
+pub fn AuditEntry::new(sequence~ : Int, actor~ : String, action~ : String, details~ : String, occurred_at~ : ObservedAt) -> Self raise CaseError
+pub fn AuditEntry::not_equal(Self, Self) -> Bool
+pub fn AuditEntry::occurred_at(Self) -> ObservedAt
+pub fn AuditEntry::sequence(Self) -> Int
+pub fn AuditEntry::to_repr(Self) -> @debug.Repr
+
+pub struct Case {
+  id : String
+  alert : Alert
+  evidence : Array[Evidence]
+  audit_trail : Array[AuditEntry]
+} derive(Eq, @debug.Debug)
+pub fn Case::add_evidence(Self, evidence~ : Evidence, actor~ : String) -> Self raise CaseError
+pub fn Case::alert(Self) -> Alert
+pub fn Case::audit_trail(Self) -> Array[AuditEntry]
+pub fn Case::equal(Self, Self) -> Bool
+pub fn Case::evidence(Self) -> Array[Evidence]
+pub fn Case::id(Self) -> String
+pub fn Case::new(id~ : String, alert~ : Alert, actor~ : String, opened_at~ : ObservedAt) -> Self raise CaseError
+pub fn Case::not_equal(Self, Self) -> Bool
+pub fn Case::record_audit(Self, actor~ : String, action~ : String, details~ : String, occurred_at~ : ObservedAt) -> Self raise CaseError
+pub fn Case::to_repr(Self) -> @debug.Repr
+
 pub struct CorrelationPattern {
   id : String
   name : String
@@ -193,6 +243,36 @@ pub(all) enum EventSource {
 pub fn EventSource::equal(Self, Self) -> Bool
 pub fn EventSource::not_equal(Self, Self) -> Bool
 pub fn EventSource::to_repr(Self) -> @debug.Repr
+
+pub struct Evidence {
+  id : String
+  kind : EvidenceKind
+  summary : String
+  source : String
+  reference : String
+  collected_at : ObservedAt
+} derive(Eq, @debug.Debug)
+pub fn Evidence::collected_at(Self) -> ObservedAt
+pub fn Evidence::equal(Self, Self) -> Bool
+pub fn Evidence::id(Self) -> String
+pub fn Evidence::kind(Self) -> EvidenceKind
+pub fn Evidence::new(id~ : String, kind~ : EvidenceKind, summary~ : String, source~ : String, reference~ : String, collected_at~ : ObservedAt) -> Self raise CaseError
+pub fn Evidence::not_equal(Self, Self) -> Bool
+pub fn Evidence::reference(Self) -> String
+pub fn Evidence::source(Self) -> String
+pub fn Evidence::summary(Self) -> String
+pub fn Evidence::to_repr(Self) -> @debug.Repr
+
+pub(all) enum EvidenceKind {
+  Event
+  RuleHit
+  IocMatch
+  AnalystNote
+  Artifact
+} derive(Eq, @debug.Debug)
+pub fn EvidenceKind::equal(Self, Self) -> Bool
+pub fn EvidenceKind::not_equal(Self, Self) -> Bool
+pub fn EvidenceKind::to_repr(Self) -> @debug.Repr
 
 pub struct Host {
   id : HostId
