@@ -208,3 +208,45 @@ pub extend Case with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub extend Case with Eq::{not_equal, equal}
+
+///|
+pub extend ResponseActionKind with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ResponseActionKind with Eq::{not_equal, equal}
+
+///|
+pub extend ResponsePlanError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ResponsePlanError with Eq::{not_equal, equal}
+
+///|
+pub extend ResponseAction with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ResponseAction with Eq::{not_equal, equal}
+
+///|
+pub extend ResponsePlan with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ResponsePlan with Eq::{not_equal, equal}
+
+///|
+pub extend DryRunOutcome with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend DryRunOutcome with Eq::{not_equal, equal}
+
+///|
+pub extend DryRunStep with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend DryRunStep with Eq::{not_equal, equal}
+
+///|
+pub extend DryRunReport with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend DryRunReport with Eq::{not_equal, equal}

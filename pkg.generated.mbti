@@ -8,6 +8,8 @@ import {
 // Values
 pub fn correlate(CorrelationPattern, Array[EventObservation]) -> Array[Detection]
 
+pub fn dry_run_response(ResponsePlan, Alert) -> DryRunReport
+
 pub fn evaluate_rule(Rule, NormalizedEvent, Array[String]) -> RuleHit?
 
 pub fn evaluate_rules(Array[Rule], NormalizedEvent, Array[String]) -> Array[RuleHit]
@@ -88,6 +90,19 @@ pub(all) suberror NormalizationError {
 pub fn NormalizationError::equal(Self, Self) -> Bool
 pub fn NormalizationError::not_equal(Self, Self) -> Bool
 pub fn NormalizationError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror ResponsePlanError {
+  EmptyPlanId
+  EmptyPlanName
+  EmptyActionSequence
+  EmptyActionId
+  EmptyActionTarget
+  EmptyActionReason
+  DuplicateActionId
+} derive(Eq, @debug.Debug)
+pub fn ResponsePlanError::equal(Self, Self) -> Bool
+pub fn ResponsePlanError::not_equal(Self, Self) -> Bool
+pub fn ResponsePlanError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror RuleError {
   EmptyRuleId
@@ -200,6 +215,43 @@ pub fn Detection::pattern_id(Self) -> String
 pub fn Detection::rule_ids(Self) -> Array[String]
 pub fn Detection::started_at(Self) -> ObservedAt
 pub fn Detection::to_repr(Self) -> @debug.Repr
+
+pub(all) enum DryRunOutcome {
+  WouldExecute
+} derive(Eq, @debug.Debug)
+pub fn DryRunOutcome::equal(Self, Self) -> Bool
+pub fn DryRunOutcome::not_equal(Self, Self) -> Bool
+pub fn DryRunOutcome::to_repr(Self) -> @debug.Repr
+
+pub struct DryRunReport {
+  plan_id : String
+  alert_id : String
+  host_id : HostId
+  steps : Array[DryRunStep]
+} derive(Eq, @debug.Debug)
+pub fn DryRunReport::alert_id(Self) -> String
+pub fn DryRunReport::equal(Self, Self) -> Bool
+pub fn DryRunReport::host_id(Self) -> HostId
+pub fn DryRunReport::not_equal(Self, Self) -> Bool
+pub fn DryRunReport::plan_id(Self) -> String
+pub fn DryRunReport::steps(Self) -> Array[DryRunStep]
+pub fn DryRunReport::to_repr(Self) -> @debug.Repr
+
+pub struct DryRunStep {
+  action_id : String
+  kind : ResponseActionKind
+  target : String
+  reason : String
+  outcome : DryRunOutcome
+} derive(Eq, @debug.Debug)
+pub fn DryRunStep::action_id(Self) -> String
+pub fn DryRunStep::equal(Self, Self) -> Bool
+pub fn DryRunStep::kind(Self) -> ResponseActionKind
+pub fn DryRunStep::not_equal(Self, Self) -> Bool
+pub fn DryRunStep::outcome(Self) -> DryRunOutcome
+pub fn DryRunStep::reason(Self) -> String
+pub fn DryRunStep::target(Self) -> String
+pub fn DryRunStep::to_repr(Self) -> @debug.Repr
 
 pub struct EventId {
   value : String
@@ -375,6 +427,45 @@ pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise Domain
 pub fn ObservedAt::not_equal(Self, Self) -> Bool
 pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
+
+pub struct ResponseAction {
+  id : String
+  kind : ResponseActionKind
+  target : String
+  reason : String
+} derive(Eq, @debug.Debug)
+pub fn ResponseAction::equal(Self, Self) -> Bool
+pub fn ResponseAction::id(Self) -> String
+pub fn ResponseAction::kind(Self) -> ResponseActionKind
+pub fn ResponseAction::new(id~ : String, kind~ : ResponseActionKind, target~ : String, reason~ : String) -> Self raise ResponsePlanError
+pub fn ResponseAction::not_equal(Self, Self) -> Bool
+pub fn ResponseAction::reason(Self) -> String
+pub fn ResponseAction::target(Self) -> String
+pub fn ResponseAction::to_repr(Self) -> @debug.Repr
+
+pub(all) enum ResponseActionKind {
+  IsolateHost
+  TerminateProcess
+  CollectArtifact
+  BlockNetwork
+  NotifyAnalyst
+} derive(Eq, @debug.Debug)
+pub fn ResponseActionKind::equal(Self, Self) -> Bool
+pub fn ResponseActionKind::not_equal(Self, Self) -> Bool
+pub fn ResponseActionKind::to_repr(Self) -> @debug.Repr
+
+pub struct ResponsePlan {
+  id : String
+  name : String
+  actions : Array[ResponseAction]
+} derive(Eq, @debug.Debug)
+pub fn ResponsePlan::actions(Self) -> Array[ResponseAction]
+pub fn ResponsePlan::equal(Self, Self) -> Bool
+pub fn ResponsePlan::id(Self) -> String
+pub fn ResponsePlan::name(Self) -> String
+pub fn ResponsePlan::new(id~ : String, name~ : String, actions~ : Array[ResponseAction]) -> Self raise ResponsePlanError
+pub fn ResponsePlan::not_equal(Self, Self) -> Bool
+pub fn ResponsePlan::to_repr(Self) -> @debug.Repr
 
 pub(all) enum RiskLevel {
   Informational
