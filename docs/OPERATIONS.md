@@ -22,7 +22,9 @@ moon run cmd/main -- --help
 ```sh
 moon fmt
 moon check --deny-warn
+moon check --target all
 moon test
+moon test --target all
 moon info
 ```
 
@@ -83,8 +85,9 @@ moon run cmd/main -- response dry-run --alert-id alert-001 --event '{"event_id":
 ## 7. 发布前检查清单
 
 1. `git status --short` 只包含本次预期改动。
-2. `moon fmt` 和 `moon check --deny-warn` 通过。
-3. `moon test` 通过，必要时补跑 `moon test e2e_test.mbt`。
+2. `moon fmt`、`moon check --deny-warn` 和 `moon check --target all` 通过。
+3. `moon test`、`moon test --target all` 和 `moon test e2e_test.mbt` 通过。
 4. `moon info` 通过，并确认没有意外的公共 API 变化。
-5. 审阅 README、架构文档、运维文档和快照 diff。
-6. 提交信息准确描述当前阶段，不把后续真实响应执行器混入本次提交。
+5. 按 [CLI Demo](../demo/README.md) 运行 hunt 和 response dry-run，确认输出仍为 dry-run。
+6. 审阅 README、架构文档、运维文档、demo 文件和快照 diff。
+7. 提交信息准确描述当前阶段，不把后续真实响应执行器混入本次提交。

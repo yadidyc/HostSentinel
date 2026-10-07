@@ -1,0 +1,2 @@
+{"event_id":"demo-process","host_id":"demo-host","hostname":"workstation-demo","platform":"linux","kind":"process","source":"agent","severity":"high","observed_at":1725000000}
+{"event_id":"demo-network","host_id":"demo-host","hostname":"workstation-demo","platform":"linux","kind":"network","source":"agent","severity":"critical","observed_at":1725000010}

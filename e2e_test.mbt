@@ -130,141 +130,150 @@ test "runs the host security pipeline from fixture to dry-run response" {
   )
   assert_eq(alert.status(), @hostsentinel.AlertStatus::Open)
 
-  debug_inspect(events, content=(
-    #|[
-    #|  {
-    #|    line_number: 1,
-    #|    raw_line: "{\"event_id\":\"e2e-process\",\"host_id\":\"e2e-host\",\"hostname\":\"workstation-e2e\",\"platform\":\"linux\",\"kind\":\"process\",\"source\":\"agent\",\"severity\":\"medium\",\"observed_at\":100}",
-    #|    host: {
-    #|      id: { value: "e2e-host" },
-    #|      hostname: "workstation-e2e",
-    #|      platform: Linux,
-    #|      state: Active,
-    #|    },
-    #|    event: {
-    #|      id: { value: "e2e-process" },
-    #|      host_id: { value: "e2e-host" },
-    #|      kind: Process,
-    #|      source: Agent,
-    #|      severity: Medium,
-    #|      observed_at: { unix_seconds: 100 },
-    #|    },
-    #|    fingerprint: "11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100",
-    #|  },
-    #|  {
-    #|    line_number: 2,
-    #|    raw_line: "{\"event_id\":\"e2e-network\",\"host_id\":\"e2e-host\",\"hostname\":\"workstation-e2e\",\"platform\":\"linux\",\"kind\":\"network\",\"source\":\"agent\",\"severity\":\"high\",\"observed_at\":110}",
-    #|    host: {
-    #|      id: { value: "e2e-host" },
-    #|      hostname: "workstation-e2e",
-    #|      platform: Linux,
-    #|      state: Active,
-    #|    },
-    #|    event: {
-    #|      id: { value: "e2e-network" },
-    #|      host_id: { value: "e2e-host" },
-    #|      kind: Network,
-    #|      source: Agent,
-    #|      severity: High,
-    #|      observed_at: { unix_seconds: 110 },
-    #|    },
-    #|    fingerprint: "11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
-    #|  },
-    #|]
-  ))
-  debug_inspect(investigation, content=(
-    #|{
-    #|  id: "e2e-case",
-    #|  alert: {
-    #|    id: "e2e-alert",
-    #|    detection: {
-    #|      pattern_id: "e2e-sequence",
-    #|      host_id: { value: "e2e-host" },
-    #|      rule_ids: ["e2e-process", "e2e-high"],
-    #|      event_fingerprints: [
-    #|        "11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100",
-    #|        "11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
-    #|      ],
-    #|      started_at: { unix_seconds: 100 },
-    #|      ended_at: { unix_seconds: 110 },
-    #|      dedup_key: "12:e2e-sequence|8:e2e-host|16:rule:e2e-process|13:rule:e2e-high|91:event:11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100|89:event:11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
-    #|    },
-    #|    score: { value: 80, level: High, max_severity: High },
-    #|    status: Open,
-    #|    created_at: { unix_seconds: 100 },
-    #|    updated_at: { unix_seconds: 100 },
-    #|  },
-    #|  evidence: [
-    #|    {
-    #|      id: "e2e-evidence-process",
-    #|      kind: Event,
-    #|      summary: "Process event matched the first rule",
-    #|      source: "fixture",
-    #|      reference: "11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100",
-    #|      collected_at: { unix_seconds: 100 },
-    #|    },
-    #|    {
-    #|      id: "e2e-evidence-network",
-    #|      kind: Event,
-    #|      summary: "High-severity network event matched the second rule",
-    #|      source: "fixture",
-    #|      reference: "11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
-    #|      collected_at: { unix_seconds: 110 },
-    #|    },
-    #|  ],
-    #|  audit_trail: [
-    #|    {
-    #|      sequence: 1,
-    #|      actor: "analyst",
-    #|      action: "case.created",
-    #|      details: "e2e-alert",
-    #|      occurred_at: { unix_seconds: 100 },
-    #|    },
-    #|    {
-    #|      sequence: 2,
-    #|      actor: "analyst",
-    #|      action: "evidence.added",
-    #|      details: "e2e-evidence-process",
-    #|      occurred_at: { unix_seconds: 100 },
-    #|    },
-    #|    {
-    #|      sequence: 3,
-    #|      actor: "analyst",
-    #|      action: "evidence.added",
-    #|      details: "e2e-evidence-network",
-    #|      occurred_at: { unix_seconds: 110 },
-    #|    },
-    #|    {
-    #|      sequence: 4,
-    #|      actor: "reviewer",
-    #|      action: "case.reviewed",
-    #|      details: "Validated the correlated fixture detection",
-    #|      occurred_at: { unix_seconds: 120 },
-    #|    },
-    #|  ],
-    #|}
-  ))
-  debug_inspect(report, content=(
-    #|{
-    #|  plan_id: "e2e-response",
-    #|  alert_id: "e2e-alert",
-    #|  host_id: { value: "e2e-host" },
-    #|  steps: [
-    #|    {
-    #|      action_id: "e2e-isolate",
-    #|      kind: IsolateHost,
-    #|      target: "e2e-host",
-    #|      reason: "Contain the host while the alert is investigated",
-    #|      outcome: WouldExecute,
-    #|    },
-    #|    {
-    #|      action_id: "e2e-notify",
-    #|      kind: NotifyAnalyst,
-    #|      target: "on-call",
-    #|      reason: "Notify the analyst of the simulated containment",
-    #|      outcome: WouldExecute,
-    #|    },
-    #|  ],
-    #|}
-  ))
+  debug_inspect(
+    events,
+    content=(
+      #|[
+      #|  {
+      #|    line_number: 1,
+      #|    raw_line: "{\"event_id\":\"e2e-process\",\"host_id\":\"e2e-host\",\"hostname\":\"workstation-e2e\",\"platform\":\"linux\",\"kind\":\"process\",\"source\":\"agent\",\"severity\":\"medium\",\"observed_at\":100}",
+      #|    host: {
+      #|      id: { value: "e2e-host" },
+      #|      hostname: "workstation-e2e",
+      #|      platform: Linux,
+      #|      state: Active,
+      #|    },
+      #|    event: {
+      #|      id: { value: "e2e-process" },
+      #|      host_id: { value: "e2e-host" },
+      #|      kind: Process,
+      #|      source: Agent,
+      #|      severity: Medium,
+      #|      observed_at: { unix_seconds: 100 },
+      #|    },
+      #|    fingerprint: "11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100",
+      #|  },
+      #|  {
+      #|    line_number: 2,
+      #|    raw_line: "{\"event_id\":\"e2e-network\",\"host_id\":\"e2e-host\",\"hostname\":\"workstation-e2e\",\"platform\":\"linux\",\"kind\":\"network\",\"source\":\"agent\",\"severity\":\"high\",\"observed_at\":110}",
+      #|    host: {
+      #|      id: { value: "e2e-host" },
+      #|      hostname: "workstation-e2e",
+      #|      platform: Linux,
+      #|      state: Active,
+      #|    },
+      #|    event: {
+      #|      id: { value: "e2e-network" },
+      #|      host_id: { value: "e2e-host" },
+      #|      kind: Network,
+      #|      source: Agent,
+      #|      severity: High,
+      #|      observed_at: { unix_seconds: 110 },
+      #|    },
+      #|    fingerprint: "11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
+      #|  },
+      #|]
+    ),
+  )
+  debug_inspect(
+    investigation,
+    content=(
+      #|{
+      #|  id: "e2e-case",
+      #|  alert: {
+      #|    id: "e2e-alert",
+      #|    detection: {
+      #|      pattern_id: "e2e-sequence",
+      #|      host_id: { value: "e2e-host" },
+      #|      rule_ids: ["e2e-process", "e2e-high"],
+      #|      event_fingerprints: [
+      #|        "11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100",
+      #|        "11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
+      #|      ],
+      #|      started_at: { unix_seconds: 100 },
+      #|      ended_at: { unix_seconds: 110 },
+      #|      dedup_key: "12:e2e-sequence|8:e2e-host|16:rule:e2e-process|13:rule:e2e-high|91:event:11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100|89:event:11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
+      #|    },
+      #|    score: { value: 80, level: High, max_severity: High },
+      #|    status: Open,
+      #|    created_at: { unix_seconds: 100 },
+      #|    updated_at: { unix_seconds: 100 },
+      #|  },
+      #|  evidence: [
+      #|    {
+      #|      id: "e2e-evidence-process",
+      #|      kind: Event,
+      #|      summary: "Process event matched the first rule",
+      #|      source: "fixture",
+      #|      reference: "11:e2e-process|8:e2e-host|15:workstation-e2e|5:linux|7:process|5:agent|6:medium|3:100",
+      #|      collected_at: { unix_seconds: 100 },
+      #|    },
+      #|    {
+      #|      id: "e2e-evidence-network",
+      #|      kind: Event,
+      #|      summary: "High-severity network event matched the second rule",
+      #|      source: "fixture",
+      #|      reference: "11:e2e-network|8:e2e-host|15:workstation-e2e|5:linux|7:network|5:agent|4:high|3:110",
+      #|      collected_at: { unix_seconds: 110 },
+      #|    },
+      #|  ],
+      #|  audit_trail: [
+      #|    {
+      #|      sequence: 1,
+      #|      actor: "analyst",
+      #|      action: "case.created",
+      #|      details: "e2e-alert",
+      #|      occurred_at: { unix_seconds: 100 },
+      #|    },
+      #|    {
+      #|      sequence: 2,
+      #|      actor: "analyst",
+      #|      action: "evidence.added",
+      #|      details: "e2e-evidence-process",
+      #|      occurred_at: { unix_seconds: 100 },
+      #|    },
+      #|    {
+      #|      sequence: 3,
+      #|      actor: "analyst",
+      #|      action: "evidence.added",
+      #|      details: "e2e-evidence-network",
+      #|      occurred_at: { unix_seconds: 110 },
+      #|    },
+      #|    {
+      #|      sequence: 4,
+      #|      actor: "reviewer",
+      #|      action: "case.reviewed",
+      #|      details: "Validated the correlated fixture detection",
+      #|      occurred_at: { unix_seconds: 120 },
+      #|    },
+      #|  ],
+      #|}
+    ),
+  )
+  debug_inspect(
+    report,
+    content=(
+      #|{
+      #|  plan_id: "e2e-response",
+      #|  alert_id: "e2e-alert",
+      #|  host_id: { value: "e2e-host" },
+      #|  steps: [
+      #|    {
+      #|      action_id: "e2e-isolate",
+      #|      kind: IsolateHost,
+      #|      target: "e2e-host",
+      #|      reason: "Contain the host while the alert is investigated",
+      #|      outcome: WouldExecute,
+      #|    },
+      #|    {
+      #|      action_id: "e2e-notify",
+      #|      kind: NotifyAnalyst,
+      #|      target: "on-call",
+      #|      reason: "Notify the analyst of the simulated containment",
+      #|      outcome: WouldExecute,
+      #|    },
+      #|  ],
+      #|}
+    ),
+  )
 }

@@ -26,6 +26,10 @@ moon run cmd/main -- response dry-run --alert-id alert-001 --event '{"event_id":
 
 dry-run 只输出计划动作，不执行隔离、通知或其他主机操作。
 
+## Demo
+
+仓库提供了可重复运行的 [CLI Demo](demo/README.md)，输入文件位于 `demo/events.jsonl`。
+
 ## 文档
 
 - [架构说明](docs/ARCHITECTURE.md)
