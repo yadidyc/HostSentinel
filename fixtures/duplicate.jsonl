@@ -1,0 +1,2 @@
+{"event_id":"duplicate-process-001","host_id":"fixture-duplicate-host","hostname":"workstation-duplicate","platform":"linux","kind":"process","source":"agent","severity":"medium","observed_at":1725004000}
+{"event_id":"duplicate-process-001","host_id":"fixture-duplicate-host","hostname":"workstation-duplicate","platform":"linux","kind":"process","source":"agent","severity":"medium","observed_at":1725004000}

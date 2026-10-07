@@ -1,0 +1,2 @@
+{"event_id":"malicious-process-001","host_id":"fixture-malicious-host","hostname":"workstation-malicious","platform":"windows","kind":"process","source":"sysmon","severity":"high","observed_at":1725002000}
+{"event_id":"malicious-network-001","host_id":"fixture-malicious-host","hostname":"workstation-malicious","platform":"windows","kind":"network","source":"sysmon","severity":"critical","observed_at":1725002010}

@@ -1,0 +1,2 @@
+{"event_id":"normal-process-001","host_id":"fixture-normal-host","hostname":"workstation-normal","platform":"linux","kind":"process","source":"agent","severity":"informational","observed_at":1725001000}
+{"event_id":"normal-file-001","host_id":"fixture-normal-host","hostname":"workstation-normal","platform":"linux","kind":"file","source":"agent","severity":"low","observed_at":1725001005}

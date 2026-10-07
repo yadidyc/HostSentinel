@@ -1,0 +1,2 @@
+{"event_id":"admin-process-001","host_id":"fixture-admin-host","hostname":"workstation-admin","platform":"windows","kind":"process","source":"windows_event","severity":"medium","observed_at":1725003000}
+{"event_id":"admin-auth-001","host_id":"fixture-admin-host","hostname":"workstation-admin","platform":"windows","kind":"authentication","source":"windows_event","severity":"informational","observed_at":1725003005}
