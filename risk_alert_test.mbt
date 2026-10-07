@@ -94,6 +94,37 @@ test "advances an alert through its lifecycle" {
 }
 
 ///|
+test "supports the planned investigating containment and closure states" {
+  let observations = risk_observations()
+  let detection = risk_detection(observations)
+  let score = @hostsentinel.score_detection(detection, observations)
+  let alert = try! @hostsentinel.Alert::new(
+    id="alert-planned-lifecycle",
+    detection~,
+    score~,
+    created_at=observations[0].event().event().observed_at(),
+  )
+  let investigating = try! alert.transition(
+    status=@hostsentinel.AlertStatus::Investigating,
+    at=try! @hostsentinel.ObservedAt::from_unix_seconds(unix_seconds=105),
+  )
+  let contained = try! investigating.transition(
+    status=@hostsentinel.AlertStatus::Contained,
+    at=try! @hostsentinel.ObservedAt::from_unix_seconds(unix_seconds=110),
+  )
+  let resolved = try! contained.transition(
+    status=@hostsentinel.AlertStatus::Resolved,
+    at=try! @hostsentinel.ObservedAt::from_unix_seconds(unix_seconds=120),
+  )
+  let closed = try! resolved.transition(
+    status=@hostsentinel.AlertStatus::Closed,
+    at=try! @hostsentinel.ObservedAt::from_unix_seconds(unix_seconds=130),
+  )
+  assert_eq(closed.status(), @hostsentinel.AlertStatus::Closed)
+  assert_eq(closed.updated_at().unix_seconds(), 130)
+}
+
+///|
 test "rejects invalid alert lifecycle changes" {
   let observations = risk_observations()
   let detection = risk_detection(observations)

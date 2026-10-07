@@ -140,7 +140,10 @@ pub(all) enum AlertStatus {
   Open
   Acknowledged
   InProgress
+  Investigating
+  Contained
   Resolved
+  Closed
   Suppressed
 } derive(Eq, @debug.Debug)
 pub fn AlertStatus::equal(Self, Self) -> Bool

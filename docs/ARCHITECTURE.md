@@ -59,7 +59,7 @@ JSONL
 
 ### 4.3 风险、告警和案件
 
-风险分数取检测内最高事件严重性作为基础分，并按规则序列长度增加 bonus，最终限制在 0 到 100。告警从 `Open` 开始，按合法生命周期转换并拒绝过期时间戳。
+风险分数取检测内最高事件严重性作为基础分，并按规则序列长度增加 bonus，最终限制在 0 到 100。告警从 `Open` 开始，推荐按 `Investigating`、`Contained`、`Resolved`、`Closed` 流转，并拒绝过期时间戳；`Acknowledged`、`InProgress` 和 `Suppressed` 保留用于兼容现有调用方。
 
 案件以告警为根，证据按插入顺序保存；每次创建案件、追加证据或手动记录动作都会产生递增的审计序号。证据和审计时间不能早于案件已有的最新审计时间。
 
@@ -69,7 +69,7 @@ JSONL
 
 ## 5. CLI 边界
 
-CLI 是薄适配层：
+CLI 是薄适配层，提供 `ingest`、`hunt`、`alerts`、`case`、`plan`、`explain` 和 `response dry-run` 入口：
 
 1. 从参数中取得 JSONL 文本和可选告警 ID。
 2. 委托根包完成规范化、检测上下文及 dry-run 组装。

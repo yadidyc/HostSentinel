@@ -65,6 +65,23 @@ moon run cmd/main -- hunt --event '{"event_id":"evt-001","host_id":"host-001","h
 
 输出包括规范化事件数量、事件 ID、主机 ID、事件类型、严重性和指纹。输入错误时 CLI 输出 `hunt: invalid JSONL input`，具体字段诊断由库层的 `NormalizationError` 提供。
 
+需要下游程序消费时，在同一命令后追加 `--json`；输出为包含行号、主机、事件字段和指纹的 JSON 数组。
+
+## 4.1 离线命令链
+
+计划中的 CLI 入口均可针对同一份 JSONL 独立运行：
+
+```sh
+moon run cmd/main -- ingest --event '<jsonl>'
+moon run cmd/main -- hunt --event '<jsonl>'
+moon run cmd/main -- alerts --alert-id alert-001 --event '<jsonl>'
+moon run cmd/main -- case --alert-id alert-001 --event '<jsonl>'
+moon run cmd/main -- plan --alert-id alert-001 --event '<jsonl>'
+moon run cmd/main -- explain --event '<jsonl>'
+```
+
+`ingest` 是规范化入口，`alerts` 和 `case` 分别输出离线告警/案件摘要，`plan` 是 dry-run 响应计划别名，`explain` 输出事件规则命中证据。它们不会在命令之间共享内存状态；需要机器读取时为任一命令追加 `--json`。
+
 ## 5. 响应计划 dry-run
 
 `response dry-run` 使用规范化输入的第一条事件生成单事件告警上下文，默认告警 ID 为 `cli-alert`，也可以用 `--alert-id` 指定：
@@ -74,6 +91,8 @@ moon run cmd/main -- response dry-run --alert-id alert-001 --event '{"event_id":
 ```
 
 报告包含告警 ID、主机 ID、风险分数、告警状态以及按计划顺序排列的动作。当前 CLI 会生成隔离主机和通知分析员两个模拟动作；两者均不会执行。
+
+追加 `--json` 会输出包含 `alert_id`、`host_id`、`risk`、`status` 和 `steps` 的 JSON 对象，便于脚本或其他离线工具继续处理。
 
 ## 6. 故障处理
 

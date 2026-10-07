@@ -18,6 +18,10 @@ moon run cmd/main -- --help
 moon run cmd/main -- hunt --event '{"event_id":"evt-001","host_id":"host-001","hostname":"workstation-01","platform":"linux","kind":"process","source":"agent","severity":"high","observed_at":1725000000}'
 ```
 
+追加 `--json` 可获得机器可读的规范化事件数组。
+
+离线命令链还提供 `ingest`、`alerts`、`case`、`plan` 和 `explain` 入口；这些命令都从显式传入的 JSONL 重建上下文，不依赖数据库或常驻服务。
+
 生成响应计划 dry-run 报告：
 
 ```sh
@@ -25,6 +29,7 @@ moon run cmd/main -- response dry-run --alert-id alert-001 --event '{"event_id":
 ```
 
 dry-run 只输出计划动作，不执行隔离、通知或其他主机操作。
+追加 `--json` 可获得机器可读的 dry-run 报告。
 
 ## Demo
 

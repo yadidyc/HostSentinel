@@ -20,6 +20,8 @@ moon run cmd/main -- hunt --event "$events"
 moon run cmd/main -- response dry-run --alert-id demo-alert --event "$events"
 ```
 
+需要机器可读结果时，在两个命令后分别追加 `--json`。
+
 ## 预期结果
 
 `hunt` 会规范化两条事件并输出两个指纹。`response dry-run` 使用第一条事件建立告警上下文，输出 `demo-alert`、`demo-host`、风险分数 `75`，以及按顺序排列的隔离主机和通知分析员两个 `would_execute` 步骤。

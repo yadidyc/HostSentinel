@@ -85,7 +85,10 @@ pub(all) enum AlertStatus {
   Open
   Acknowledged
   InProgress
+  Investigating
+  Contained
   Resolved
+  Closed
   Suppressed
 } derive(Debug, Eq)
 
@@ -198,6 +201,8 @@ fn is_allowed_transition(from : AlertStatus, to : AlertStatus) -> Bool {
       match to {
         AlertStatus::Acknowledged
         | AlertStatus::InProgress
+        | AlertStatus::Investigating
+        | AlertStatus::Contained
         | AlertStatus::Resolved
         | AlertStatus::Suppressed => true
         _ => false
@@ -205,15 +210,35 @@ fn is_allowed_transition(from : AlertStatus, to : AlertStatus) -> Bool {
     AlertStatus::Acknowledged =>
       match to {
         AlertStatus::InProgress
+        | AlertStatus::Investigating
+        | AlertStatus::Contained
         | AlertStatus::Resolved
         | AlertStatus::Suppressed => true
         _ => false
       }
     AlertStatus::InProgress =>
       match to {
-        AlertStatus::Resolved | AlertStatus::Suppressed => true
+        AlertStatus::Investigating
+        | AlertStatus::Contained
+        | AlertStatus::Resolved
+        | AlertStatus::Closed
+        | AlertStatus::Suppressed => true
         _ => false
       }
-    AlertStatus::Resolved | AlertStatus::Suppressed => false
+    AlertStatus::Investigating =>
+      match to {
+        AlertStatus::Contained
+        | AlertStatus::Resolved
+        | AlertStatus::Closed
+        | AlertStatus::Suppressed => true
+        _ => false
+      }
+    AlertStatus::Contained =>
+      match to {
+        AlertStatus::Resolved | AlertStatus::Closed => true
+        _ => false
+      }
+    AlertStatus::Resolved => to == AlertStatus::Closed
+    AlertStatus::Closed | AlertStatus::Suppressed => false
   }
 }
