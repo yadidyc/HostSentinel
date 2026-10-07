@@ -25,3 +25,8 @@ moon run cmd/main -- response dry-run --alert-id alert-001 --event '{"event_id":
 ```
 
 dry-run 只输出计划动作，不执行隔离、通知或其他主机操作。
+
+## 文档
+
+- [架构说明](docs/ARCHITECTURE.md)
+- [运维手册](docs/OPERATIONS.md)
