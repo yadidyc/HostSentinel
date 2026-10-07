@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install MoonBit
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s latest
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Show toolchain versions
+        run: moon version --all
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          moon fmt
+          git diff --exit-code
+
+      - name: Check default target
+        run: moon check --deny-warn
+
+      - name: Build default target
+        run: moon build
+
+      - name: Check all targets
+        run: moon check --target all
+
+      - name: Test default target
+        run: moon test
+
+      - name: Test all targets
+        run: moon test --target all
+
+      - name: Check public interfaces
+        shell: bash
+        run: |
+          moon info
+          git diff --exit-code -- '*.mbti'
