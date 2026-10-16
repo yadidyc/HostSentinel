@@ -14,6 +14,8 @@ pub fn evaluate_rule(Rule, NormalizedEvent, Array[String]) -> RuleHit?
 
 pub fn evaluate_rules(Array[Rule], NormalizedEvent, Array[String]) -> Array[RuleHit]
 
+pub fn hunt_session_leads(String, window_seconds? : Int64) -> SessionLeadReport raise NormalizationError
+
 pub fn match_ioc(Indicator, String) -> IocMatch?
 
 pub fn match_iocs(Array[Indicator], String) -> Array[IocMatch]
@@ -406,6 +408,22 @@ pub fn IocMatch::indicator(Self) -> Indicator
 pub fn IocMatch::not_equal(Self, Self) -> Bool
 pub fn IocMatch::to_repr(Self) -> @debug.Repr
 
+pub struct LeadRejection {
+  event_ids : Array[String]
+  reason : LeadRejectionReason
+}
+pub fn LeadRejection::event_ids(Self) -> Array[String]
+pub fn LeadRejection::reason(Self) -> LeadRejectionReason
+
+pub(all) enum LeadRejectionReason {
+  BootMismatch
+  SessionMismatch
+  ProcessInstanceMismatch
+  SourceNotIndependent
+  TimeWindowMismatch
+  InsufficientSignal
+}
+
 pub struct NormalizedEvent {
   line_number : Int
   raw_line : String
@@ -555,6 +573,26 @@ pub fn SecurityEvent::observed_at(Self) -> ObservedAt
 pub fn SecurityEvent::severity(Self) -> Severity
 pub fn SecurityEvent::source(Self) -> EventSource
 pub fn SecurityEvent::to_repr(Self) -> @debug.Repr
+
+pub struct SessionLead {
+  host_id : HostId
+  session_id : String
+  process_key : String
+  evidence : Array[NormalizedEvent]
+  dedup_key : String
+}
+pub fn SessionLead::dedup_key(Self) -> String
+pub fn SessionLead::evidence(Self) -> Array[NormalizedEvent]
+pub fn SessionLead::host_id(Self) -> HostId
+pub fn SessionLead::process_key(Self) -> String
+pub fn SessionLead::session_id(Self) -> String
+
+pub struct SessionLeadReport {
+  leads : Array[SessionLead]
+  rejections : Array[LeadRejection]
+}
+pub fn SessionLeadReport::leads(Self) -> Array[SessionLead]
+pub fn SessionLeadReport::rejections(Self) -> Array[LeadRejection]
 
 pub(all) enum Severity {
   Informational

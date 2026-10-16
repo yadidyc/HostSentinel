@@ -31,3 +31,14 @@ moon run cmd/main -- response dry-run --alert-id demo-alert --event "$events"
 ```sh
 moon test e2e_test.mbt
 ```
+
+## 多来源线索示例
+
+```powershell
+$events = Get-Content fixtures/session-lead-positive.jsonl -Raw
+moon run cmd/main -- leads --event $events --json
+$events = Get-Content fixtures/session-lead-session-mismatch.jsonl -Raw
+moon run cmd/main -- leads --event $events --json
+```
+
+首个结果应有 1 条线索及 3 条来源证据；第二个结果应有 0 条线索和 `session_mismatch`。`session-lead-pid-reuse.jsonl` 同样不生成线索，拒绝原因为 `process_instance_mismatch`。

@@ -2,9 +2,10 @@
 
 ## 1. 当前定位
 
-HostSentinel 是一个以 MoonBit 核心库为中心的主机威胁狩猎与响应平台原型。当前实现把输入、检测、调查和响应计划组织在同一个进程内，并通过 CLI 暴露两条可验证的工作流：
+HostSentinel 是一个以 MoonBit 核心库为中心的主机威胁狩猎与响应平台原型。当前实现把输入、检测、调查和响应计划组织在同一个进程内，并通过 CLI 暴露三条可验证的工作流：
 
 - `hunt`：把 JSONL 事件规范化并输出狩猎摘要。
+- `leads`：对已映射身份字段的登录、进程与网络事件生成跨来源候选线索及拒绝原因。
 - `response dry-run`：从事件建立告警上下文，生成响应步骤，但不执行主机操作。
 
 当前版本没有常驻采集器、数据库、网络服务或真实响应执行器。CLI 与领域库之间没有隐式状态，调用方负责提供事件、规则、关联模式和响应计划。
@@ -35,6 +36,7 @@ JSONL
 | `ioc.mbt` | 规范化 IOC 值并提供单个或批量 IOC 匹配。 |
 | `rule.mbt` | 定义版本化规则、条件组合和 `RuleHit` 证据。 |
 | `correlation.mbt` | 按主机、顺序和时间窗口把规则命中关联为 `Detection`。 |
+| `session_lead.mbt` | 按启动周期、登录会话、进程实例及独立来源验证登录→进程→网络候选链。 |
 | `risk_alert.mbt` | 根据关联事件严重性计算风险分数，并维护告警状态转换。 |
 | `case.mbt` | 将告警绑定到案件，追加证据并记录有序审计轨迹。 |
 | `response_plan.mbt` | 定义响应动作和计划，生成 `DryRunReport`。 |
@@ -57,6 +59,8 @@ JSONL
 
 关联模式声明有序规则 ID 和时间窗口。`correlate` 只把同一主机、时间顺序正确且处于窗口内的命中组合为检测，并为检测生成稳定 `dedup_key`。
 
+独立的 `hunt_session_leads` 接收扩展 JSONL：三种事件都需要 `boot_id`/`session_id`，进程与网络还需要 `pid`/`process_started_at`。只有三种来源互异、实体身份一致且顺序/窗口成立，才输出带三条原始事件引用的候选线索；可比较但不成立的组合返回拒绝原因。这一结果不自动转成告警，也不把时间关系解释为攻击因果。原生事件格式适配与父子进程/持久化关系仍是后续范围。
+
 ### 4.3 风险、告警和案件
 
 风险分数取检测内最高事件严重性作为基础分，并按规则序列长度增加 bonus，最终限制在 0 到 100。告警从 `Open` 开始，推荐按 `Investigating`、`Contained`、`Resolved`、`Closed` 流转，并拒绝过期时间戳；`Acknowledged`、`InProgress` 和 `Suppressed` 保留用于兼容现有调用方。
@@ -69,7 +73,7 @@ JSONL
 
 ## 5. CLI 边界
 
-CLI 是薄适配层，提供 `ingest`、`hunt`、`alerts`、`case`、`plan`、`explain` 和 `response dry-run` 入口：
+CLI 是薄适配层，提供 `ingest`、`hunt`、`leads`、`alerts`、`case`、`plan`、`explain` 和 `response dry-run` 入口：
 
 1. 从参数中取得 JSONL 文本和可选告警 ID。
 2. 委托根包完成规范化、检测上下文及 dry-run 组装。

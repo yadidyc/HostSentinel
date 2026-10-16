@@ -74,13 +74,14 @@ moon run cmd/main -- hunt --event '{"event_id":"evt-001","host_id":"host-001","h
 ```sh
 moon run cmd/main -- ingest --event '<jsonl>'
 moon run cmd/main -- hunt --event '<jsonl>'
+moon run cmd/main -- leads --event '<identity-jsonl>'
 moon run cmd/main -- alerts --alert-id alert-001 --event '<jsonl>'
 moon run cmd/main -- case --alert-id alert-001 --event '<jsonl>'
 moon run cmd/main -- plan --alert-id alert-001 --event '<jsonl>'
 moon run cmd/main -- explain --event '<jsonl>'
 ```
 
-`ingest` 是规范化入口，`alerts` 和 `case` 分别输出离线告警/案件摘要，`plan` 是 dry-run 响应计划别名，`explain` 输出事件规则命中证据。它们不会在命令之间共享内存状态；需要机器读取时为任一命令追加 `--json`。
+`ingest` 是规范化入口，`leads` 使用额外的启动周期/会话/进程身份字段核验跨来源线索，`alerts` 和 `case` 分别输出离线告警/案件摘要，`plan` 是 dry-run 响应计划别名，`explain` 输出事件规则命中证据。它们不会在命令之间共享内存状态；需要机器读取时为任一命令追加 `--json`。
 
 ## 5. 响应计划 dry-run
 

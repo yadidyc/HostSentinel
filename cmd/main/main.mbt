@@ -7,6 +7,7 @@ fn main {
     ["--version"] => println("\{@core.project_name()} v\{@core.version()}")
     ["ingest", .. rest] => run_ingest(rest.to_owned())
     ["hunt", .. rest] => run_hunt(rest.to_owned())
+    ["leads", .. rest] => run_leads(rest.to_owned())
     ["alerts", .. rest] => run_alerts(rest.to_owned())
     ["case", .. rest] => run_case(rest.to_owned())
     ["plan", .. rest] => run_plan(rest.to_owned())
@@ -26,6 +27,7 @@ fn print_help() -> Unit {
   println("Usage:")
   println("  hostsentinel ingest --event <jsonl> [--json]")
   println("  hostsentinel hunt --event <jsonl> [--json]")
+  println("  hostsentinel leads --event <jsonl> [--json]")
   println("  hostsentinel alerts --event <jsonl> [--alert-id <id>] [--json]")
   println("  hostsentinel case --event <jsonl> [--alert-id <id>] [--json]")
   println("  hostsentinel plan --event <jsonl> [--alert-id <id>] [--json]")
@@ -41,6 +43,12 @@ fn print_hunt_help() -> Unit {
   println("Usage: hostsentinel hunt --event <jsonl> [--json]")
   println("Normalize one JSONL event and print its hunting summary.")
   println("Use --json to emit a machine-readable event array.")
+}
+
+///|
+fn print_leads_help() -> Unit {
+  println("Usage: hostsentinel leads --event <jsonl> [--json]")
+  println("Correlate login, process, and network telemetry by identity.")
 }
 
 ///|
@@ -262,6 +270,83 @@ fn run_hunt(args : Array[String]) -> Unit {
           }
       }
     None => print_hunt_help()
+  }
+}
+
+///|
+fn lead_reason_token(reason : @core.LeadRejectionReason) -> String {
+  match reason {
+    @core.LeadRejectionReason::BootMismatch => "boot_mismatch"
+    @core.LeadRejectionReason::SessionMismatch => "session_mismatch"
+    @core.LeadRejectionReason::ProcessInstanceMismatch =>
+      "process_instance_mismatch"
+    @core.LeadRejectionReason::SourceNotIndependent => "source_not_independent"
+    @core.LeadRejectionReason::TimeWindowMismatch => "time_window_mismatch"
+    @core.LeadRejectionReason::InsufficientSignal => "insufficient_signal"
+  }
+}
+
+///|
+fn lead_evidence_json(event : @core.NormalizedEvent) -> String {
+  "{\"event_id\":\"\{json_escape(event.event().id().as_string())}\",\"source\":\"\{json_escape(source_token(event.event().source()))}\",\"line_number\":\{event.line_number()},\"fingerprint\":\"\{json_escape(event.fingerprint())}\"}"
+}
+
+///|
+fn lead_report_json(report : @core.SessionLeadReport) -> String {
+  let leads = report
+    .leads()
+    .map(lead => {
+      let evidence = lead.evidence().map(lead_evidence_json).join(",")
+      "{\"host_id\":\"\{json_escape(lead.host_id().as_string())}\",\"session_id\":\"\{json_escape(lead.session_id())}\",\"process_key\":\"\{json_escape(lead.process_key())}\",\"evidence\":[\{evidence}]}"
+    })
+    .join(",")
+  let rejections = report
+    .rejections()
+    .map(rejection => {
+      "{\"event_ids\":[\{json_string_array(rejection.event_ids())}],\"reason\":\"\{lead_reason_token(rejection.reason())}\"}"
+    })
+    .join(",")
+  "{\"leads\":[\{leads}],\"rejections\":[\{rejections}]}"
+}
+
+///|
+fn run_leads(args : Array[String]) -> Unit {
+  if args is ["--help"] {
+    print_leads_help()
+    return
+  }
+  match option_value(args, "--event") {
+    Some(source) =>
+      try @core.hunt_session_leads(source) catch {
+        @core.NormalizationError::MissingField(line_number~, field~) =>
+          println("leads: missing field \{field} on line \{line_number}")
+        @core.NormalizationError::InvalidField(line_number~, field~, ..) =>
+          println("leads: invalid field \{field} on line \{line_number}")
+        _ => println("leads: invalid JSONL input")
+      } noraise {
+        report =>
+          if has_flag(args, "--json") {
+            println(lead_report_json(report))
+          } else {
+            println("leads: verified=\{report.leads().length()}")
+            for lead in report.leads() {
+              let ids = lead
+                .evidence()
+                .map(event => {
+                  "\{event.event().id().as_string()}@\{source_token(event.event().source())}:\{event.line_number()}"
+                })
+              println(
+                "lead host=\{lead.host_id().as_string()} session=\{lead.session_id()} process=\{lead.process_key()} evidence=\{ids.join(",")}",
+              )
+            }
+            for rejection in report.rejections() {
+              println(
+                "rejected events=\{rejection.event_ids().join(",")} reason=\{lead_reason_token(rejection.reason())}",
+              )
+            }
+          }
+      }
+    None => print_leads_help()
   }
 }
 
