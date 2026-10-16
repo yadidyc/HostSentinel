@@ -11,14 +11,14 @@ pub(all) enum RiskLevel {
 ///|
 /// A bounded risk score and the strongest event severity used to calculate it.
 pub struct RiskScore {
-  value : Int
+  value : Int32
   level : RiskLevel
   max_severity : Severity
 } derive(Debug, Eq)
 
 ///|
 /// Returns the numeric score in the inclusive range 0 to 100.
-pub fn RiskScore::value(self : RiskScore) -> Int {
+pub fn RiskScore::value(self : RiskScore) -> Int32 {
   self.value
 }
 
@@ -65,7 +65,7 @@ pub fn score_detection(
 }
 
 ///|
-fn risk_level(value : Int) -> RiskLevel {
+fn risk_level(value : Int32) -> RiskLevel {
   if value >= 90 {
     RiskLevel::Critical
   } else if value >= 70 {

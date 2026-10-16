@@ -1,16 +1,16 @@
 ///|
 /// Errors raised while converting one JSONL record into the domain model.
 pub(all) suberror NormalizationError {
-  InvalidJson(line_number~ : Int, line~ : String)
-  ExpectedObject(line_number~ : Int, line~ : String)
-  MissingField(line_number~ : Int, field~ : String)
-  InvalidField(line_number~ : Int, field~ : String, value~ : String)
+  InvalidJson(line_number~ : Int32, line~ : String)
+  ExpectedObject(line_number~ : Int32, line~ : String)
+  MissingField(line_number~ : Int32, field~ : String)
+  InvalidField(line_number~ : Int32, field~ : String, value~ : String)
 } derive(Debug, Eq)
 
 ///|
 /// A normalized event together with its host, source line, and deduplication key.
 pub struct NormalizedEvent {
-  line_number : Int
+  line_number : Int32
   raw_line : String
   host : Host
   event : SecurityEvent
@@ -19,7 +19,7 @@ pub struct NormalizedEvent {
 
 ///|
 /// Returns the physical JSONL line number.
-pub fn NormalizedEvent::line_number(self : NormalizedEvent) -> Int {
+pub fn NormalizedEvent::line_number(self : NormalizedEvent) -> Int32 {
   self.line_number
 }
 
@@ -59,7 +59,7 @@ fn json_field(value : Json, field : String) -> Json? {
 ///|
 fn required_text(
   value : Json,
-  line_number : Int,
+  line_number : Int32,
   field : String,
 ) -> String raise NormalizationError {
   match json_field(value, field) {
@@ -83,7 +83,7 @@ fn required_text(
 ///|
 fn required_timestamp_text(
   value : Json,
-  line_number : Int,
+  line_number : Int32,
   field : String,
 ) -> String raise NormalizationError {
   match json_field(value, field) {
@@ -96,7 +96,7 @@ fn required_timestamp_text(
 ///|
 fn parse_unix_seconds(
   text : String,
-  line_number : Int,
+  line_number : Int32,
   field : String,
 ) -> ObservedAt raise NormalizationError {
   let value = text.trim().to_owned()
@@ -176,7 +176,7 @@ fn parse_platform(value : String) -> HostPlatform {
 ///|
 fn parse_kind(
   value : String,
-  line_number : Int,
+  line_number : Int32,
 ) -> EventKind raise NormalizationError {
   match canonical_label(value) {
     "process" => EventKind::Process
@@ -208,7 +208,7 @@ fn parse_source(value : String) -> EventSource {
 ///|
 fn parse_severity(
   value : String,
-  line_number : Int,
+  line_number : Int32,
 ) -> Severity raise NormalizationError {
   match canonical_label(value) {
     "informational" => Severity::Informational
@@ -287,7 +287,7 @@ fn fingerprint(host : Host, event : SecurityEvent) -> String {
 ///|
 fn normalize_line(
   line : String,
-  line_number : Int,
+  line_number : Int32,
 ) -> NormalizedEvent raise NormalizationError {
   let value = @json.parse(line) catch {
     _ => raise NormalizationError::InvalidJson(line_number~, line~)

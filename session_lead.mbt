@@ -191,7 +191,7 @@ fn candidate_reason(
 /// and process_started_at. Only distinct sources can corroborate a lead.
 pub fn hunt_session_leads(
   source : String,
-  window_seconds? : Int64 = 90,
+  window_seconds~ : Int64 = 90,
 ) -> SessionLeadReport raise NormalizationError {
   if window_seconds <= 0 {
     raise NormalizationError::InvalidField(

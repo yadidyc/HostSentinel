@@ -184,7 +184,7 @@ pub fn correlate(
 fn find_detection(
   pattern : CorrelationPattern,
   observations : Array[EventObservation],
-  start_index : Int,
+  start_index : Int32,
 ) -> Detection? {
   let start_observation = observations[start_index]
   let start_event = start_observation.event()

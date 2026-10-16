@@ -26,7 +26,7 @@ pub struct Rule {
   id : String
   name : String
   description : String
-  version : Int
+  version : Int32
   condition : RuleCondition
 } derive(Debug, Eq)
 
@@ -36,7 +36,7 @@ pub fn Rule::new(
   id~ : String,
   name~ : String,
   description~ : String,
-  version~ : Int,
+  version~ : Int32,
   condition~ : RuleCondition,
 ) -> Rule raise RuleError {
   if id.trim() == "" {
@@ -81,7 +81,7 @@ pub fn Rule::description(self : Rule) -> String {
 
 ///|
 /// Returns the rule version.
-pub fn Rule::version(self : Rule) -> Int {
+pub fn Rule::version(self : Rule) -> Int32 {
   self.version
 }
 
@@ -95,7 +95,7 @@ pub fn Rule::condition(self : Rule) -> RuleCondition {
 /// Evidence produced when a rule matches one event.
 pub struct RuleHit {
   rule_id : String
-  rule_version : Int
+  rule_version : Int32
   event_fingerprint : String
   evidence : Array[String]
 } derive(Debug, Eq)
@@ -108,7 +108,7 @@ pub fn RuleHit::rule_id(self : RuleHit) -> String {
 
 ///|
 /// Returns the matched rule version.
-pub fn RuleHit::rule_version(self : RuleHit) -> Int {
+pub fn RuleHit::rule_version(self : RuleHit) -> Int32 {
   self.rule_version
 }
 
@@ -264,7 +264,7 @@ fn evaluate_condition(
 }
 
 ///|
-fn severity_rank(severity : Severity) -> Int {
+fn severity_rank(severity : Severity) -> Int32 {
   match severity {
     Severity::Informational => 0
     Severity::Low => 1

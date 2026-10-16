@@ -105,7 +105,7 @@ pub fn Evidence::collected_at(self : Evidence) -> ObservedAt {
 ///|
 /// One immutable entry in a case audit trail.
 pub struct AuditEntry {
-  sequence : Int
+  sequence : Int32
   actor : String
   action : String
   details : String
@@ -115,7 +115,7 @@ pub struct AuditEntry {
 ///|
 /// Creates a validated audit entry with an explicit sequence number.
 pub fn AuditEntry::new(
-  sequence~ : Int,
+  sequence~ : Int32,
   actor~ : String,
   action~ : String,
   details~ : String,
@@ -141,7 +141,7 @@ pub fn AuditEntry::new(
 
 ///|
 /// Returns the one-based position of this entry in a case audit trail.
-pub fn AuditEntry::sequence(self : AuditEntry) -> Int {
+pub fn AuditEntry::sequence(self : AuditEntry) -> Int32 {
   self.sequence
 }
 

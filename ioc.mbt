@@ -126,7 +126,7 @@ fn is_supported_hash(value : String) -> Bool {
         continue false
       }
       match character {
-        '0'..='9' | 'a'..='f' => continue true
+        '0'..<='9' | 'a'..<='f' => continue true
         _ => continue false
       }
     } nobreak {
