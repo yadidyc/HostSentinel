@@ -1,0 +1,4 @@
+type=SYSCALL msg=audit(1704067201.123:100): arch=c000003e syscall=59 success=yes exit=0 pid=42 ppid=1 auid=1000 uid=1000 ses=7 comm="echo" exe="/bin/echo"
+type=EXECVE msg=audit(1704067201.123:100): argc=2 a0="/bin/echo" a1="hello"
+type=PATH msg=audit(1704067201.123:100): item=0 name="/bin/echo" nametype=NORMAL
+type=SYSCALL msg=audit(1704067202.123:101): arch=c000003e syscall=2 success=yes exit=3 pid=42 auid=1000 ses=7

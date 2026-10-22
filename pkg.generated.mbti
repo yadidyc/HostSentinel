@@ -22,9 +22,15 @@ pub fn match_ioc(Indicator, String) -> IocMatch?
 
 pub fn match_iocs(Array[Indicator], String) -> Array[IocMatch]
 
+pub fn normalize_auditd_exec(String, String) -> Array[HostEvent] raise AdapterError
+
 pub fn normalize_jsonl(String) -> Array[NormalizedEvent] raise NormalizationError
 
 pub fn normalize_ocsf_jsonl(String) -> Array[HostEvent] raise AdapterError
+
+pub fn normalize_sysmon_xml(String, record_number? : Int) -> HostEvent raise AdapterError
+
+pub fn normalize_windows_security_xml(String, record_number? : Int) -> HostEvent raise AdapterError
 
 pub fn project_name() -> String
 
