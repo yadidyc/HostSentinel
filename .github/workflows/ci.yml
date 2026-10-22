@@ -32,6 +32,9 @@ jobs:
       - name: Show toolchain versions
         run: moon version --all
 
+      - name: Update MoonBit registry
+        run: moon update
+
       - name: Check formatting
         shell: bash
         run: |
