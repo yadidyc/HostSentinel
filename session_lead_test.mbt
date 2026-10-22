@@ -136,3 +136,24 @@ test "missing identity never produces a verified lead" {
     _ => fail("expected identity validation to fail")
   }
 }
+
+///|
+test "rule-backed session leads keep valid and PID-reuse candidates separate" {
+  let source = session_lead_fixture() +
+    "\n" +
+    (
+      #|{"event_id":"network-reused","host_id":"host-h","hostname":"workstation-h","platform":"windows","kind":"network","source":"agent","severity":"high","observed_at":121,"boot_id":"boot-1","session_id":"S7","pid":42,"process_started_at":115}
+    )
+  let report = try! @hostsentinel.hunt_session_leads(source)
+  assert_eq(report.leads().length(), 1)
+  assert_eq(
+    report.leads()[0].evidence()[2].event().id().as_string(),
+    "network-p42",
+  )
+  assert_eq(report.rejections().length(), 1)
+  assert_eq(report.rejections()[0].event_ids()[2], "network-reused")
+  match report.rejections()[0].reason() {
+    @hostsentinel.LeadRejectionReason::ProcessInstanceMismatch => ()
+    _ => fail("expected process instance mismatch")
+  }
+}

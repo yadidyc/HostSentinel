@@ -2,6 +2,7 @@
 /// A host event with the identity required for session-bound hunting.
 priv struct SessionObservation {
   event : NormalizedEvent
+  host_event : HostEvent
   boot_id : String
   session_id : String
   pid : Int64?
@@ -127,7 +128,23 @@ fn session_observation(
       (Some(pid), Some(started))
     }
   }
-  { event, boot_id, session_id, pid, process_started_at, }
+  {
+    event,
+    host_event: host_event_from_normalized(event),
+    boot_id,
+    session_id,
+    pid,
+    process_started_at,
+  }
+}
+
+///|
+/// The legacy wrapper keeps its input validation and rejection vocabulary;
+/// acceptance is decided by the same configurable engine used by new rules.
+fn session_lead_rule(window_seconds : Int64) -> CompiledCorrelationRule {
+  let source =
+    $|[{"id":"session-auth","version":1,"detection":{"selection":{"class":"authentication"},"condition":"selection"}},{"id":"session-process","version":1,"detection":{"selection":{"class":"process"},"condition":"selection"}},{"id":"session-network","version":1,"detection":{"selection":{"class":"network"},"condition":"selection"}},{"id":"session-lead","version":1,"correlation":{"type":"temporal_ordered","rules":["session-auth","session-process","session-network"],"group-by":["host"],"timespan":"\{window_seconds}s","identity":{"same":["boot","session"],"same-between":[{"field":"process","rules":["session-process","session-network"]}],"sources":"different","missing":"reject"}}}]
+  try! compile_correlation_rules_json(source)[0]
 }
 
 ///|
@@ -201,6 +218,7 @@ pub fn hunt_session_leads(
     )
   }
   let events = normalize_jsonl(source)
+  let rule = session_lead_rule(window_seconds)
   let auths : Array[SessionObservation] = []
   let processes : Array[SessionObservation] = []
   let networks : Array[SessionObservation] = []
@@ -228,6 +246,22 @@ pub fn hunt_session_leads(
           process.event.event().id().as_string(),
           network.event.event().id().as_string(),
         ]
+        let matched = try! correlate_identity_safe(rule, [
+          auth.host_event,
+          process.host_event,
+          network.host_event,
+        ])
+        if matched.results().is_empty() {
+          match candidate_reason(auth, process, network, window_seconds) {
+            Some(reason) => rejections.push({ event_ids, reason, })
+            None =>
+              rejections.push({
+                event_ids,
+                reason: LeadRejectionReason::InsufficientSignal,
+              })
+          }
+          continue
+        }
         match candidate_reason(auth, process, network, window_seconds) {
           Some(reason) => rejections.push({ event_ids, reason, })
           None => {
