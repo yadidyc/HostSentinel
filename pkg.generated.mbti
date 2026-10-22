@@ -14,6 +14,8 @@ pub fn evaluate_rule(Rule, NormalizedEvent, Array[String]) -> RuleHit?
 
 pub fn evaluate_rules(Array[Rule], NormalizedEvent, Array[String]) -> Array[RuleHit]
 
+pub fn host_event_from_normalized(NormalizedEvent) -> HostEvent
+
 pub fn hunt_session_leads(String, window_seconds? : Int64) -> SessionLeadReport raise NormalizationError
 
 pub fn match_ioc(Indicator, String) -> IocMatch?
@@ -74,6 +76,13 @@ pub(all) suberror DomainError {
 pub fn DomainError::equal(Self, Self) -> Bool
 pub fn DomainError::not_equal(Self, Self) -> Bool
 pub fn DomainError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror HostEventError {
+  EmptyIdentity
+} derive(Eq, @debug.Debug)
+pub fn HostEventError::equal(Self, Self) -> Bool
+pub fn HostEventError::not_equal(Self, Self) -> Bool
+pub fn HostEventError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror IocError {
   EmptyValue(kind~ : IocKind)
@@ -301,6 +310,14 @@ pub fn EventSource::equal(Self, Self) -> Bool
 pub fn EventSource::not_equal(Self, Self) -> Bool
 pub fn EventSource::to_repr(Self) -> @debug.Repr
 
+pub(all) struct EventTime {
+  value : Int64
+  precision : TimePrecision
+} derive(Eq, @debug.Debug)
+pub fn EventTime::equal(Self, Self) -> Bool
+pub fn EventTime::not_equal(Self, Self) -> Bool
+pub fn EventTime::to_repr(Self) -> @debug.Repr
+
 pub struct Evidence {
   id : String
   kind : EvidenceKind
@@ -346,6 +363,23 @@ pub fn Host::platform(Self) -> HostPlatform
 pub fn Host::state(Self) -> HostState
 pub fn Host::to_repr(Self) -> @debug.Repr
 
+pub(all) struct HostEvent {
+  id : EventId
+  source : EventSource
+  source_id : Identity
+  time : EventTime
+  category : String
+  class_name : String
+  activity : String
+  identities : HostIdentities
+  network : NetworkAttributes
+  original : OriginalEventReference
+  diagnostics : Array[MappingDiagnostic]
+} derive(Eq, @debug.Debug)
+pub fn HostEvent::equal(Self, Self) -> Bool
+pub fn HostEvent::not_equal(Self, Self) -> Bool
+pub fn HostEvent::to_repr(Self) -> @debug.Repr
+
 pub struct HostId {
   value : String
 } derive(Eq, @debug.Debug)
@@ -354,6 +388,19 @@ pub fn HostId::equal(Self, Self) -> Bool
 pub fn HostId::new(value~ : String) -> Self raise DomainError
 pub fn HostId::not_equal(Self, Self) -> Bool
 pub fn HostId::to_repr(Self) -> @debug.Repr
+
+pub(all) struct HostIdentities {
+  host : Identity
+  boot : Identity
+  user : Identity
+  session : Identity
+  process : Identity
+  parent_process : Identity
+} derive(Eq, @debug.Debug)
+pub fn HostIdentities::equal(Self, Self) -> Bool
+pub fn HostIdentities::missing() -> Self
+pub fn HostIdentities::not_equal(Self, Self) -> Bool
+pub fn HostIdentities::to_repr(Self) -> @debug.Repr
 
 pub(all) enum HostPlatform {
   Windows
@@ -373,6 +420,30 @@ pub(all) enum HostState {
 pub fn HostState::equal(Self, Self) -> Bool
 pub fn HostState::not_equal(Self, Self) -> Bool
 pub fn HostState::to_repr(Self) -> @debug.Repr
+
+pub struct Identity {
+  status : IdentityStatus
+  value : String?
+} derive(Eq, @debug.Debug)
+pub fn Identity::equal(Self, Self) -> Bool
+pub fn Identity::missing() -> Self
+pub fn Identity::not_equal(Self, Self) -> Bool
+pub fn Identity::status(Self) -> IdentityStatus
+pub fn Identity::to_repr(Self) -> @debug.Repr
+pub fn Identity::unknown() -> Self
+pub fn Identity::unverified(String) -> Self raise HostEventError
+pub fn Identity::value(Self) -> String?
+pub fn Identity::verified(String) -> Self raise HostEventError
+
+pub(all) enum IdentityStatus {
+  Missing
+  Unknown
+  Unverified
+  Verified
+} derive(Eq, @debug.Debug)
+pub fn IdentityStatus::equal(Self, Self) -> Bool
+pub fn IdentityStatus::not_equal(Self, Self) -> Bool
+pub fn IdentityStatus::to_repr(Self) -> @debug.Repr
 
 pub struct Indicator {
   kind : IocKind
@@ -424,6 +495,37 @@ pub(all) enum LeadRejectionReason {
   InsufficientSignal
 }
 
+pub(all) struct MappingDiagnostic {
+  path : String
+  issue : MappingIssue
+  detail : String
+} derive(Eq, @debug.Debug)
+pub fn MappingDiagnostic::equal(Self, Self) -> Bool
+pub fn MappingDiagnostic::not_equal(Self, Self) -> Bool
+pub fn MappingDiagnostic::to_repr(Self) -> @debug.Repr
+
+pub(all) enum MappingIssue {
+  Missing
+  Invalid
+  Lossy
+  Unverified
+} derive(Eq, @debug.Debug)
+pub fn MappingIssue::equal(Self, Self) -> Bool
+pub fn MappingIssue::not_equal(Self, Self) -> Bool
+pub fn MappingIssue::to_repr(Self) -> @debug.Repr
+
+pub(all) struct NetworkAttributes {
+  src_ip : String?
+  src_port : Int?
+  dst_ip : String?
+  dst_port : Int?
+  protocol : String?
+} derive(Eq, @debug.Debug)
+pub fn NetworkAttributes::empty() -> Self
+pub fn NetworkAttributes::equal(Self, Self) -> Bool
+pub fn NetworkAttributes::not_equal(Self, Self) -> Bool
+pub fn NetworkAttributes::to_repr(Self) -> @debug.Repr
+
 pub struct NormalizedEvent {
   line_number : Int
   raw_line : String
@@ -448,6 +550,16 @@ pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise Domain
 pub fn ObservedAt::not_equal(Self, Self) -> Bool
 pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
+
+pub(all) struct OriginalEventReference {
+  format : String
+  record_number : Int
+  record_id : String?
+  raw : String
+} derive(Eq, @debug.Debug)
+pub fn OriginalEventReference::equal(Self, Self) -> Bool
+pub fn OriginalEventReference::not_equal(Self, Self) -> Bool
+pub fn OriginalEventReference::to_repr(Self) -> @debug.Repr
 
 pub struct ResponseAction {
   id : String
@@ -604,6 +716,14 @@ pub(all) enum Severity {
 pub fn Severity::equal(Self, Self) -> Bool
 pub fn Severity::not_equal(Self, Self) -> Bool
 pub fn Severity::to_repr(Self) -> @debug.Repr
+
+pub(all) enum TimePrecision {
+  Seconds
+  Milliseconds
+} derive(Eq, @debug.Debug)
+pub fn TimePrecision::equal(Self, Self) -> Bool
+pub fn TimePrecision::not_equal(Self, Self) -> Bool
+pub fn TimePrecision::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
