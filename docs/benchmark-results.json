@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-23",
+  "platform": "Windows native/debug",
+  "moon_version": "0.1.20261012",
+  "dataset": "deterministic synthetic JSONL; four labeled three-stage cases plus file noise",
+  "repetitions": 1,
+  "peak_memory_note": "not measured; null is not zero",
+  "comparison": [
+    {"method":"simple-host-window","events":1000,"tp":1,"fp":3,"fn":0,"precision":0.25,"recall":1,"elapsed_ms":14,"events_per_second":71428.57142857143,"peak_memory_bytes":null},
+    {"method":"legacy-session-api","events":1000,"tp":1,"fp":0,"fn":0,"precision":1,"recall":1,"elapsed_ms":15,"events_per_second":66666.66666666667,"peak_memory_bytes":null},
+    {"method":"configurable-identity","events":1000,"tp":1,"fp":0,"fn":0,"precision":1,"recall":1,"elapsed_ms":20,"events_per_second":50000,"peak_memory_bytes":null},
+    {"method":"simple-host-window","events":10000,"tp":1,"fp":3,"fn":0,"precision":0.25,"recall":1,"elapsed_ms":135,"events_per_second":74074.07407407407,"peak_memory_bytes":null},
+    {"method":"legacy-session-api","events":10000,"tp":1,"fp":0,"fn":0,"precision":1,"recall":1,"elapsed_ms":134,"events_per_second":74626.86567164179,"peak_memory_bytes":null},
+    {"method":"configurable-identity","events":10000,"tp":1,"fp":0,"fn":0,"precision":1,"recall":1,"elapsed_ms":217,"events_per_second":46082.949308755764,"peak_memory_bytes":null},
+    {"method":"simple-host-window","events":100000,"tp":1,"fp":3,"fn":0,"precision":0.25,"recall":1,"elapsed_ms":1320,"events_per_second":75757.57575757576,"peak_memory_bytes":null},
+    {"method":"legacy-session-api","events":100000,"tp":1,"fp":0,"fn":0,"precision":1,"recall":1,"elapsed_ms":1327,"events_per_second":75357.95026375282,"peak_memory_bytes":null},
+    {"method":"configurable-identity","events":100000,"tp":1,"fp":0,"fn":0,"precision":1,"recall":1,"elapsed_ms":2141,"events_per_second":46707.14619336758,"peak_memory_bytes":null}
+  ],
+  "rule_scaling": [
+    {"events":1000,"rules":1,"matches":1,"elapsed_ms":2,"peak_memory_bytes":null},
+    {"events":1000,"rules":10,"matches":10,"elapsed_ms":20,"peak_memory_bytes":null},
+    {"events":1000,"rules":50,"matches":50,"elapsed_ms":104,"peak_memory_bytes":null}
+  ]
+}
