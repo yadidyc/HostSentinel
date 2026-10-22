@@ -12,7 +12,7 @@ pub fn compile_correlation_rules_yaml(String) -> Array[CompiledCorrelationRule] 
 
 pub fn correlate(CorrelationPattern, Array[EventObservation]) -> Array[Detection]
 
-pub fn correlate_identity_safe(CompiledCorrelationRule, Array[HostEvent], max_events? : Int, max_candidates? : Int, max_results? : Int, max_diagnostics? : Int, diagnostic? : Bool) -> IdentityCorrelationReport raise CorrelationRuleError
+pub fn correlate_identity_safe(CompiledCorrelationRule, Array[HostEvent], max_events? : Int32, max_candidates? : Int32, max_results? : Int32, max_diagnostics? : Int32, diagnostic? : Bool) -> IdentityCorrelationReport raise CorrelationRuleError
 
 pub fn dry_run_response(ResponsePlan, Alert) -> DryRunReport
 
@@ -36,9 +36,9 @@ pub fn normalize_jsonl(String) -> Array[NormalizedEvent] raise NormalizationErro
 
 pub fn normalize_ocsf_jsonl(String) -> Array[HostEvent] raise AdapterError
 
-pub fn normalize_sysmon_xml(String, record_number? : Int) -> HostEvent raise AdapterError
+pub fn normalize_sysmon_xml(String, record_number? : Int32) -> HostEvent raise AdapterError
 
-pub fn normalize_windows_security_xml(String, record_number? : Int) -> HostEvent raise AdapterError
+pub fn normalize_windows_security_xml(String, record_number? : Int32) -> HostEvent raise AdapterError
 
 pub fn project_name() -> String
 
@@ -48,11 +48,11 @@ pub fn version() -> String
 
 // Errors
 pub(all) suberror AdapterError {
-  InvalidJson(record_number~ : Int, raw~ : String)
-  ExpectedObject(record_number~ : Int)
-  MissingField(record_number~ : Int, path~ : String)
-  InvalidField(record_number~ : Int, path~ : String, detail~ : String)
-  Unsupported(record_number~ : Int, path~ : String, value~ : String)
+  InvalidJson(record_number~ : Int32, raw~ : String)
+  ExpectedObject(record_number~ : Int32)
+  MissingField(record_number~ : Int32, path~ : String)
+  InvalidField(record_number~ : Int32, path~ : String, detail~ : String)
+  Unsupported(record_number~ : Int32, path~ : String, value~ : String)
 } derive(Eq, @debug.Debug)
 pub fn AdapterError::equal(Self, Self) -> Bool
 pub fn AdapterError::not_equal(Self, Self) -> Bool
@@ -127,10 +127,10 @@ pub fn IocError::not_equal(Self, Self) -> Bool
 pub fn IocError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror NormalizationError {
-  InvalidJson(line_number~ : Int, line~ : String)
-  ExpectedObject(line_number~ : Int, line~ : String)
-  MissingField(line_number~ : Int, field~ : String)
-  InvalidField(line_number~ : Int, field~ : String, value~ : String)
+  InvalidJson(line_number~ : Int32, line~ : String)
+  ExpectedObject(line_number~ : Int32, line~ : String)
+  MissingField(line_number~ : Int32, field~ : String)
+  InvalidField(line_number~ : Int32, field~ : String, value~ : String)
 } derive(Eq, @debug.Debug)
 pub fn NormalizationError::equal(Self, Self) -> Bool
 pub fn NormalizationError::not_equal(Self, Self) -> Bool
@@ -196,7 +196,7 @@ pub fn AlertStatus::not_equal(Self, Self) -> Bool
 pub fn AlertStatus::to_repr(Self) -> @debug.Repr
 
 pub struct AuditEntry {
-  sequence : Int
+  sequence : Int32
   actor : String
   action : String
   details : String
@@ -206,15 +206,15 @@ pub fn AuditEntry::action(Self) -> String
 pub fn AuditEntry::actor(Self) -> String
 pub fn AuditEntry::details(Self) -> String
 pub fn AuditEntry::equal(Self, Self) -> Bool
-pub fn AuditEntry::new(sequence~ : Int, actor~ : String, action~ : String, details~ : String, occurred_at~ : ObservedAt) -> Self raise CaseError
+pub fn AuditEntry::new(sequence~ : Int32, actor~ : String, action~ : String, details~ : String, occurred_at~ : ObservedAt) -> Self raise CaseError
 pub fn AuditEntry::not_equal(Self, Self) -> Bool
 pub fn AuditEntry::occurred_at(Self) -> ObservedAt
-pub fn AuditEntry::sequence(Self) -> Int
+pub fn AuditEntry::sequence(Self) -> Int32
 pub fn AuditEntry::to_repr(Self) -> @debug.Repr
 
 pub(all) struct BaseEventRule {
   id : String
-  version : Int
+  version : Int32
   predicates : Array[BaseFieldPredicate]
 }
 
@@ -242,7 +242,7 @@ pub fn Case::to_repr(Self) -> @debug.Repr
 
 pub struct CompiledCorrelationRule {
   id : String
-  version : Int
+  version : Int32
   kind : CorrelationRuleKind
   rule_ids : Array[String]
   base_rules : Array[BaseEventRule]
@@ -250,7 +250,7 @@ pub struct CompiledCorrelationRule {
   aliases : Array[FieldAlias]
   window_ms : Int64
   operator : CountOperator?
-  threshold : Int?
+  threshold : Int32?
   value_field : String?
   same_identities : Array[String]
   same_between : Array[ScopedIdentityConstraint]
@@ -262,7 +262,7 @@ pub fn CompiledCorrelationRule::id(Self) -> String
 pub fn CompiledCorrelationRule::kind(Self) -> CorrelationRuleKind
 pub fn CompiledCorrelationRule::missing_policy(Self) -> IdentityMissingPolicy
 pub fn CompiledCorrelationRule::rule_ids(Self) -> Array[String]
-pub fn CompiledCorrelationRule::version(Self) -> Int
+pub fn CompiledCorrelationRule::version(Self) -> Int32
 pub fn CompiledCorrelationRule::window_ms(Self) -> Int64
 
 pub(all) struct CorrelationKeyEvidence {
@@ -549,19 +549,19 @@ pub fn IdentityCorrelationDiagnostic::reason(Self) -> String
 pub struct IdentityCorrelationReport {
   results : Array[IdentityCorrelationResult]
   diagnostics : Array[IdentityCorrelationDiagnostic]
-  examined_candidates : Int
+  examined_candidates : Int32
   results_truncated : Bool
   diagnostics_truncated : Bool
 }
 pub fn IdentityCorrelationReport::diagnostics(Self) -> Array[IdentityCorrelationDiagnostic]
 pub fn IdentityCorrelationReport::diagnostics_truncated(Self) -> Bool
-pub fn IdentityCorrelationReport::examined_candidates(Self) -> Int
+pub fn IdentityCorrelationReport::examined_candidates(Self) -> Int32
 pub fn IdentityCorrelationReport::results(Self) -> Array[IdentityCorrelationResult]
 pub fn IdentityCorrelationReport::results_truncated(Self) -> Bool
 
 pub struct IdentityCorrelationResult {
   rule_id : String
-  rule_version : Int
+  rule_version : Int32
   event_ids : Array[String]
   sources : Array[String]
   group_key : String
@@ -581,7 +581,7 @@ pub fn IdentityCorrelationResult::group_key(Self) -> String
 pub fn IdentityCorrelationResult::keys(Self) -> Array[CorrelationKeyEvidence]
 pub fn IdentityCorrelationResult::mapping(Self) -> Array[String]
 pub fn IdentityCorrelationResult::rule_id(Self) -> String
-pub fn IdentityCorrelationResult::rule_version(Self) -> Int
+pub fn IdentityCorrelationResult::rule_version(Self) -> Int32
 pub fn IdentityCorrelationResult::sources(Self) -> Array[String]
 pub fn IdentityCorrelationResult::span_ms(Self) -> Int64
 pub fn IdentityCorrelationResult::window_ms(Self) -> Int64
@@ -686,9 +686,9 @@ pub fn MappingIssue::to_repr(Self) -> @debug.Repr
 
 pub(all) struct NetworkAttributes {
   src_ip : String?
-  src_port : Int?
+  src_port : Int32?
   dst_ip : String?
-  dst_port : Int?
+  dst_port : Int32?
   protocol : String?
 } derive(Eq, @debug.Debug)
 pub fn NetworkAttributes::empty() -> Self
@@ -697,7 +697,7 @@ pub fn NetworkAttributes::not_equal(Self, Self) -> Bool
 pub fn NetworkAttributes::to_repr(Self) -> @debug.Repr
 
 pub struct NormalizedEvent {
-  line_number : Int
+  line_number : Int32
   raw_line : String
   host : Host
   event : SecurityEvent
@@ -707,7 +707,7 @@ pub fn NormalizedEvent::equal(Self, Self) -> Bool
 pub fn NormalizedEvent::event(Self) -> SecurityEvent
 pub fn NormalizedEvent::fingerprint(Self) -> String
 pub fn NormalizedEvent::host(Self) -> Host
-pub fn NormalizedEvent::line_number(Self) -> Int
+pub fn NormalizedEvent::line_number(Self) -> Int32
 pub fn NormalizedEvent::not_equal(Self, Self) -> Bool
 pub fn NormalizedEvent::raw_line(Self) -> String
 pub fn NormalizedEvent::to_repr(Self) -> @debug.Repr
@@ -722,11 +722,11 @@ pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
 
 pub(all) struct OcsfClassification {
-  category_uid : Int
-  class_uid : Int
-  activity_id : Int
-  type_uid : Int
-  severity_id : Int
+  category_uid : Int32
+  class_uid : Int32
+  activity_id : Int32
+  type_uid : Int32
+  severity_id : Int32
 } derive(Eq, @debug.Debug)
 pub fn OcsfClassification::equal(Self, Self) -> Bool
 pub fn OcsfClassification::not_equal(Self, Self) -> Bool
@@ -734,7 +734,7 @@ pub fn OcsfClassification::to_repr(Self) -> @debug.Repr
 
 pub(all) struct OriginalEventReference {
   format : String
-  record_number : Int
+  record_number : Int32
   record_id : String?
   raw : String
 } derive(Eq, @debug.Debug)
@@ -798,7 +798,7 @@ pub fn RiskLevel::not_equal(Self, Self) -> Bool
 pub fn RiskLevel::to_repr(Self) -> @debug.Repr
 
 pub struct RiskScore {
-  value : Int
+  value : Int32
   level : RiskLevel
   max_severity : Severity
 } derive(Eq, @debug.Debug)
@@ -807,13 +807,13 @@ pub fn RiskScore::level(Self) -> RiskLevel
 pub fn RiskScore::max_severity(Self) -> Severity
 pub fn RiskScore::not_equal(Self, Self) -> Bool
 pub fn RiskScore::to_repr(Self) -> @debug.Repr
-pub fn RiskScore::value(Self) -> Int
+pub fn RiskScore::value(Self) -> Int32
 
 pub struct Rule {
   id : String
   name : String
   description : String
-  version : Int
+  version : Int32
   condition : RuleCondition
 } derive(Eq, @debug.Debug)
 pub fn Rule::condition(Self) -> RuleCondition
@@ -821,10 +821,10 @@ pub fn Rule::description(Self) -> String
 pub fn Rule::equal(Self, Self) -> Bool
 pub fn Rule::id(Self) -> String
 pub fn Rule::name(Self) -> String
-pub fn Rule::new(id~ : String, name~ : String, description~ : String, version~ : Int, condition~ : RuleCondition) -> Self raise RuleError
+pub fn Rule::new(id~ : String, name~ : String, description~ : String, version~ : Int32, condition~ : RuleCondition) -> Self raise RuleError
 pub fn Rule::not_equal(Self, Self) -> Bool
 pub fn Rule::to_repr(Self) -> @debug.Repr
-pub fn Rule::version(Self) -> Int
+pub fn Rule::version(Self) -> Int32
 
 pub(all) enum RuleCondition {
   EventKindIs(EventKind)
@@ -841,7 +841,7 @@ pub fn RuleCondition::to_repr(Self) -> @debug.Repr
 
 pub struct RuleHit {
   rule_id : String
-  rule_version : Int
+  rule_version : Int32
   event_fingerprint : String
   evidence : Array[String]
 } derive(Eq, @debug.Debug)
@@ -850,7 +850,7 @@ pub fn RuleHit::event_fingerprint(Self) -> String
 pub fn RuleHit::evidence(Self) -> Array[String]
 pub fn RuleHit::not_equal(Self, Self) -> Bool
 pub fn RuleHit::rule_id(Self) -> String
-pub fn RuleHit::rule_version(Self) -> Int
+pub fn RuleHit::rule_version(Self) -> Int32
 pub fn RuleHit::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ScopedIdentityConstraint {
@@ -910,7 +910,7 @@ pub fn Severity::to_repr(Self) -> @debug.Repr
 
 pub struct SigmaCorrelationMatch {
   rule_id : String
-  rule_version : Int
+  rule_version : Int32
   kind : CorrelationRuleKind
   group_key : String
   event_ids : Array[String]
@@ -919,16 +919,16 @@ pub struct SigmaCorrelationMatch {
   events : Array[HostEvent]
   started_ms : Int64
   ended_ms : Int64
-  observed_count : Int
+  observed_count : Int32
 }
 pub fn SigmaCorrelationMatch::ended_ms(Self) -> Int64
 pub fn SigmaCorrelationMatch::event_ids(Self) -> Array[String]
 pub fn SigmaCorrelationMatch::group_key(Self) -> String
 pub fn SigmaCorrelationMatch::kind(Self) -> CorrelationRuleKind
 pub fn SigmaCorrelationMatch::matched_rule_ids(Self) -> Array[String]
-pub fn SigmaCorrelationMatch::observed_count(Self) -> Int
+pub fn SigmaCorrelationMatch::observed_count(Self) -> Int32
 pub fn SigmaCorrelationMatch::rule_id(Self) -> String
-pub fn SigmaCorrelationMatch::rule_version(Self) -> Int
+pub fn SigmaCorrelationMatch::rule_version(Self) -> Int32
 pub fn SigmaCorrelationMatch::sources(Self) -> Array[String]
 pub fn SigmaCorrelationMatch::started_ms(Self) -> Int64
 
