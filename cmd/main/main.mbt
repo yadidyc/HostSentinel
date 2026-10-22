@@ -1,7 +1,28 @@
 ///|
 /// Command-line entry point for hunting and response workflows.
-fn main {
+async fn main {
   let args = @env.args()
+  match args[1:] {
+    [] | ["--help"] => {
+      print_file_help()
+      print_help()
+    }
+    ["normalize", .. rest] => run_file_normalize(rest.to_owned())
+    ["rules", "validate", .. rest] => run_rule_validate(rest.to_owned())
+    ["correlate", .. rest] => run_file_correlate(rest.to_owned())
+    ["benchmark", .. rest] => run_file_benchmark(rest.to_owned())
+    ["explain", .. rest] =>
+      if option_value(rest.to_owned(), "--rule-file") is Some(_) {
+        run_file_explain(rest.to_owned())
+      } else {
+        run_explain(rest.to_owned())
+      }
+    _ => run_legacy_cli(args)
+  }
+}
+
+///|
+fn run_legacy_cli(args : Array[String]) -> Unit {
   match args[1:] {
     [] | ["--help"] => print_help()
     ["--version"] => println("\{@core.project_name()} v\{@core.version()}")
@@ -19,6 +40,25 @@ fn main {
       print_help()
     }
   }
+}
+
+///|
+fn print_file_help() -> Unit {
+  println("\{@core.project_name()} v\{@core.version()}")
+  println("Usage:")
+  println(
+    "  hostsentinel normalize --events-file <path> [--format legacy|ocsf|sysmon|windows|auditd] [--host-id <id>] [--json|--jsonl]",
+  )
+  println("  hostsentinel rules validate --rule-file <path> [--json]")
+  println(
+    "  hostsentinel correlate --rule-file <path> --events-file <path> [--format legacy|ocsf|sysmon|windows|auditd] [--json|--jsonl] [--diagnostic]",
+  )
+  println(
+    "  hostsentinel explain --rule-file <path> --events-file <path> [--format legacy|ocsf|sysmon|windows|auditd] [--json|--jsonl]",
+  )
+  println(
+    "  hostsentinel benchmark --rule-file <path> --events-file <path> [--format legacy|ocsf|sysmon|windows|auditd] [--json]",
+  )
 }
 
 ///|

@@ -1,53 +1,30 @@
 # HostSentinel
 
-主机威胁狩猎与响应平台。当前版本提供事件规范化摘要、会话与进程身份约束的多来源候选线索，以及不会执行真实操作的响应计划 dry-run CLI。
+HostSentinel 是 MoonBit 实现的离线主机遥测规范化与身份安全关联工具。它把多来源事件映射为 `HostEvent`，用外部 JSON/YAML 规则构造关联候选，再核对主机、启动周期、会话、进程实例、父子关系和来源约束，输出可追溯证据与拒绝诊断。线索不等于攻击确认，来源声明身份也不等于独立核验。
 
-## 开发
+仅按相同主机与时间窗口组合事件，可能把重启后的会话、重用的 PID 或不同进程误连。关联引擎要求规则明确约束身份；身份缺失默认拒绝，并标记证据等级。五套合成正反例见[案例说明](docs/correlation-fixtures.md)。
 
-需要已安装 MoonBit 工具链：
+## 开始使用
+
+安装 MoonBit 工具链后，在仓库根目录执行。文件型 CLI 依赖异步文件系统，命令包仅支持 native 目标；核心库仍可在四种后端构建与测试。原有 `hunt`、`ingest`、`leads`、`alerts`、`case`、`plan`、`explain --event` 和 `response dry-run` 在 native CLI 中仍可用：
 
 ```sh
 moon fmt
-moon check --deny-warn
+moon check --target all --deny-warn
+moon test --target all
 moon run cmd/main -- --help
+moon run cmd/main -- rules validate --rule-file fixtures/correlation/process-network.rules.yaml --json
+moon run cmd/main -- normalize --events-file fixtures/correlation/process-network.positive.jsonl --format legacy --jsonl
+moon run cmd/main -- correlate --rule-file fixtures/correlation/process-network.rules.yaml --events-file fixtures/correlation/process-network.positive.jsonl --format legacy --json
+moon run cmd/main -- explain --rule-file fixtures/correlation/process-network.rules.yaml --events-file fixtures/correlation/process-network.negative.jsonl --format legacy --jsonl
 ```
 
-狩猎单条 JSONL 事件：
+此例的正例关联进程与网络事件；反例因 PID 重用导致进程实例不一致，`explain` 输出拒绝原因。命令使用本地文件而非内置规则。`--json` 返回数组或命令摘要，`--jsonl` 逐条输出；非法规则、记录或缺失文件返回诊断及非零退出码。`--format` 可选 `legacy`（默认）、`ocsf`、`sysmon`、`windows`、`auditd`；`sysmon` 和 `windows` 的 XML 输入为单条事件，auditd 还须传 `--host-id`。文件以 UTF-8 读取。
 
-```sh
-moon run cmd/main -- hunt --event '{"event_id":"evt-001","host_id":"host-001","hostname":"workstation-01","platform":"linux","kind":"process","source":"agent","severity":"high","observed_at":1725000000}'
-```
+要新增检测场景，复制并修改[规则样例](fixtures/correlation/process-network.rules.yaml)，定义基础选择器、关联类型、分组/窗口及 `correlation.identity` 约束，然后用 `rules validate` 检查，再用 `correlate` 读取新的事件文件；无需修改或重编译 MoonBit 核心。字段、Schema 与限制见[规则指南](docs/correlation-rules.md)。支持 Sigma 风格的 `event_count`、`value_count`、`temporal`、`temporal_ordered` 子集，不是完整 Sigma 实现。OCSF 1.9.0 仅支持认证登录、进程启动、网络连接打开；原生输入仅支持 Sysmon 1/3、Windows Security 4624 和 auditd EXECVE 组。
 
-追加 `--json` 可获得机器可读的规范化事件数组。
+## 复现实验与边界
 
-离线命令链还提供 `ingest`、`alerts`、`case`、`plan` 和 `explain` 入口；这些命令都从显式传入的 JSONL 重建上下文，不依赖数据库或常驻服务。
+按[实验方法](docs/benchmark-methodology.md)运行 1k/10k/100k 合成输入及 1/10/50 规则规模，核对[结果与原始 JSON](docs/benchmark-results.md)。`benchmark --rule-file <path> --events-file <path> --format <format> --json` 可以计时任意受支持的离线文件，但不生成真值标签；准确率对比应使用固定测试驱动。峰值内存尚未可靠采集，结果中的 `null` 不是零。
 
-`leads` 将 Windows 登录、Sysmon 进程和代理网络事件按会话与进程实例连接为候选线索，并解释被拒绝的组合。输入需要额外的身份字段，格式见[事件 Schema](docs/event-schema.md)。
-
-```sh
-events="$(cat fixtures/session-lead-positive.jsonl)"
-moon run cmd/main -- leads --event "$events" --json
-```
-
-同一组事件将返回 1 条线索；[会话不符](fixtures/session-lead-session-mismatch.jsonl)和 [PID 重用](fixtures/session-lead-pid-reuse.jsonl)样例均返回 0 条线索及具体拒绝原因。线索表示可复核的事件关系，不等同于确认攻击。
-
-生成响应计划 dry-run 报告：
-
-```sh
-moon run cmd/main -- response dry-run --alert-id alert-001 --event '{"event_id":"evt-001","host_id":"host-001","hostname":"workstation-01","platform":"linux","kind":"process","source":"agent","severity":"high","observed_at":1725000000}'
-```
-
-dry-run 只输出计划动作，不执行隔离、通知或其他主机操作。
-追加 `--json` 可获得机器可读的 dry-run 报告。
-
-## Demo
-
-仓库提供了可重复运行的 [CLI Demo](demo/README.md)，输入文件位于 `demo/events.jsonl`。
-
-## 文档
-
-- [架构说明](docs/ARCHITECTURE.md)
-- [事件 Schema](docs/event-schema.md)
-- [多来源检测语义与正反例](docs/DETECTION_SEMANTICS.md)
-- [规则编写指南](docs/rule-authoring.md)
-- [运维手册](docs/OPERATIONS.md)
+当前不支持完整 Sigma/OCSF、任意 Windows XML 或 auditd 记录、流式/持久化关联、来源真实性验证及实际主机响应；`response dry-run` 仅输出动作计划。完整输入、语义、输出与后端限制见[兼容性矩阵](docs/compatibility-matrix.md)。另见[架构](docs/ARCHITECTURE.md)、[事件模型](docs/host-event-model.md)、[运维](docs/OPERATIONS.md)及[旧 CLI Demo](demo/README.md)。

@@ -1,6 +1,12 @@
 import {
   "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/buffer",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
   "yadidyc/hostsentinel" @core,
 }
 
 pkgtype(kind: "executable")
+
+supported_targets = "native"

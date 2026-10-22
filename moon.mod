@@ -11,3 +11,7 @@ keywords = [ "security", "threat-hunting", "host-response" ]
 preferred_target = "native"
 
 description = "Host threat hunting and response platform"
+
+import {
+  "moonbitlang/async@0.22.5",
+}

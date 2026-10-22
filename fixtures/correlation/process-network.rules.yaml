@@ -1,0 +1,30 @@
+id: process
+version: 1
+detection:
+  selection:
+    class: process
+  condition: selection
+---
+id: network
+version: 1
+detection:
+  selection:
+    class: network
+  condition: selection
+---
+id: process-network
+version: 1
+correlation:
+  type: temporal_ordered
+  rules:
+    - process
+    - network
+  group-by:
+    - host
+  timespan: 30s
+  identity:
+    same:
+      - boot
+      - process
+    sources: different
+    missing: reject
