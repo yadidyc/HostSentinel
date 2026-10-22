@@ -6,6 +6,10 @@ import {
 }
 
 // Values
+pub fn compile_correlation_rules_json(String) -> Array[CompiledCorrelationRule] raise CorrelationRuleError
+
+pub fn compile_correlation_rules_yaml(String) -> Array[CompiledCorrelationRule] raise CorrelationRuleError
+
 pub fn correlate(CorrelationPattern, Array[EventObservation]) -> Array[Detection]
 
 pub fn dry_run_response(ResponsePlan, Alert) -> DryRunReport
@@ -85,6 +89,13 @@ pub(all) suberror CorrelationError {
 pub fn CorrelationError::equal(Self, Self) -> Bool
 pub fn CorrelationError::not_equal(Self, Self) -> Bool
 pub fn CorrelationError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror CorrelationRuleError {
+  Invalid(path~ : String, detail~ : String)
+} derive(Eq, @debug.Debug)
+pub fn CorrelationRuleError::equal(Self, Self) -> Bool
+pub fn CorrelationRuleError::not_equal(Self, Self) -> Bool
+pub fn CorrelationRuleError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror DomainError {
   EmptyHostId
@@ -197,6 +208,17 @@ pub fn AuditEntry::occurred_at(Self) -> ObservedAt
 pub fn AuditEntry::sequence(Self) -> Int
 pub fn AuditEntry::to_repr(Self) -> @debug.Repr
 
+pub(all) struct BaseEventRule {
+  id : String
+  version : Int
+  predicates : Array[BaseFieldPredicate]
+}
+
+pub(all) struct BaseFieldPredicate {
+  field : String
+  value : String
+}
+
 pub struct Case {
   id : String
   alert : Alert
@@ -214,6 +236,25 @@ pub fn Case::not_equal(Self, Self) -> Bool
 pub fn Case::record_audit(Self, actor~ : String, action~ : String, details~ : String, occurred_at~ : ObservedAt) -> Self raise CaseError
 pub fn Case::to_repr(Self) -> @debug.Repr
 
+pub struct CompiledCorrelationRule {
+  id : String
+  version : Int
+  kind : CorrelationRuleKind
+  rule_ids : Array[String]
+  base_rules : Array[BaseEventRule]
+  group_by : Array[String]
+  aliases : Array[FieldAlias]
+  window_ms : Int64
+  operator : CountOperator?
+  threshold : Int?
+  value_field : String?
+}
+pub fn CompiledCorrelationRule::id(Self) -> String
+pub fn CompiledCorrelationRule::kind(Self) -> CorrelationRuleKind
+pub fn CompiledCorrelationRule::rule_ids(Self) -> Array[String]
+pub fn CompiledCorrelationRule::version(Self) -> Int
+pub fn CompiledCorrelationRule::window_ms(Self) -> Int64
+
 pub struct CorrelationPattern {
   id : String
   name : String
@@ -228,6 +269,28 @@ pub fn CorrelationPattern::not_equal(Self, Self) -> Bool
 pub fn CorrelationPattern::rule_ids(Self) -> Array[String]
 pub fn CorrelationPattern::to_repr(Self) -> @debug.Repr
 pub fn CorrelationPattern::window_seconds(Self) -> Int64
+
+pub(all) enum CorrelationRuleKind {
+  EventCount
+  ValueCount
+  Temporal
+  TemporalOrdered
+} derive(Eq, @debug.Debug)
+pub fn CorrelationRuleKind::equal(Self, Self) -> Bool
+pub fn CorrelationRuleKind::not_equal(Self, Self) -> Bool
+pub fn CorrelationRuleKind::to_repr(Self) -> @debug.Repr
+
+pub(all) enum CountOperator {
+  Gt
+  Gte
+  Lt
+  Lte
+  Eq
+  Neq
+} derive(Eq, @debug.Debug)
+pub fn CountOperator::equal(Self, Self) -> Bool
+pub fn CountOperator::not_equal(Self, Self) -> Bool
+pub fn CountOperator::to_repr(Self) -> @debug.Repr
 
 pub struct Detection {
   pattern_id : String
@@ -366,6 +429,11 @@ pub(all) enum EvidenceKind {
 pub fn EvidenceKind::equal(Self, Self) -> Bool
 pub fn EvidenceKind::not_equal(Self, Self) -> Bool
 pub fn EvidenceKind::to_repr(Self) -> @debug.Repr
+
+pub(all) struct FieldAlias {
+  name : String
+  mappings : Map[String, String]
+}
 
 pub struct Host {
   id : HostId
