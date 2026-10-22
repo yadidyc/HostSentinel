@@ -199,6 +199,22 @@ pub extend MappingDiagnostic with Eq::{equal, not_equal}
 pub extend MappingDiagnostic with @debug.Debug::{to_repr}
 
 ///|
+/// Numeric OCSF classification, present only after a validated OCSF mapping.
+pub(all) struct OcsfClassification {
+  category_uid : Int32
+  class_uid : Int32
+  activity_id : Int32
+  type_uid : Int32
+  severity_id : Int32
+} derive(Debug, Eq)
+
+///|
+pub extend OcsfClassification with Eq::{equal, not_equal}
+
+///|
+pub extend OcsfClassification with @debug.Debug::{to_repr}
+
+///|
 /// Shared event representation; category/class/activity are source-neutral labels,
 /// not an assertion that the record conforms to a particular external schema.
 pub(all) struct HostEvent {
@@ -209,6 +225,7 @@ pub(all) struct HostEvent {
   category : String
   class_name : String
   activity : String
+  ocsf : OcsfClassification?
   identities : HostIdentities
   network : NetworkAttributes
   original : OriginalEventReference
@@ -310,6 +327,7 @@ pub fn host_event_from_normalized(event : NormalizedEvent) -> HostEvent {
     category: "legacy",
     class_name: kind_token(event.event().kind()),
     activity: "observed",
+    ocsf: None,
     identities,
     network: NetworkAttributes::empty(),
     original: {

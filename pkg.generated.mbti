@@ -24,6 +24,8 @@ pub fn match_iocs(Array[Indicator], String) -> Array[IocMatch]
 
 pub fn normalize_jsonl(String) -> Array[NormalizedEvent] raise NormalizationError
 
+pub fn normalize_ocsf_jsonl(String) -> Array[HostEvent] raise AdapterError
+
 pub fn project_name() -> String
 
 pub fn score_detection(Detection, Array[EventObservation]) -> RiskScore
@@ -31,6 +33,17 @@ pub fn score_detection(Detection, Array[EventObservation]) -> RiskScore
 pub fn version() -> String
 
 // Errors
+pub(all) suberror AdapterError {
+  InvalidJson(record_number~ : Int, raw~ : String)
+  ExpectedObject(record_number~ : Int)
+  MissingField(record_number~ : Int, path~ : String)
+  InvalidField(record_number~ : Int, path~ : String, detail~ : String)
+  Unsupported(record_number~ : Int, path~ : String, value~ : String)
+} derive(Eq, @debug.Debug)
+pub fn AdapterError::equal(Self, Self) -> Bool
+pub fn AdapterError::not_equal(Self, Self) -> Bool
+pub fn AdapterError::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror AlertError {
   EmptyAlertId
   InvalidTransition(from~ : AlertStatus, to~ : AlertStatus)
@@ -371,6 +384,7 @@ pub(all) struct HostEvent {
   category : String
   class_name : String
   activity : String
+  ocsf : OcsfClassification?
   identities : HostIdentities
   network : NetworkAttributes
   original : OriginalEventReference
@@ -550,6 +564,17 @@ pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise Domain
 pub fn ObservedAt::not_equal(Self, Self) -> Bool
 pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
+
+pub(all) struct OcsfClassification {
+  category_uid : Int
+  class_uid : Int
+  activity_id : Int
+  type_uid : Int
+  severity_id : Int
+} derive(Eq, @debug.Debug)
+pub fn OcsfClassification::equal(Self, Self) -> Bool
+pub fn OcsfClassification::not_equal(Self, Self) -> Bool
+pub fn OcsfClassification::to_repr(Self) -> @debug.Repr
 
 pub(all) struct OriginalEventReference {
   format : String
