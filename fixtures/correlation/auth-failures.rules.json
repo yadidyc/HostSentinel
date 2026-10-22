@@ -1,0 +1,1 @@
+[{"id":"failure","version":1,"detection":{"selection":{"class":"authentication","source_id":"failure-feed"},"condition":"selection"}},{"id":"auth-failures","version":1,"correlation":{"type":"event_count","rules":["failure"],"group-by":["host","session"],"timespan":"60s","condition":{"gte":3},"identity":{"same":["boot","session"],"missing":"reject"}}}]

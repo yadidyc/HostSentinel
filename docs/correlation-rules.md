@@ -48,3 +48,5 @@ YAML 适配器用 MoonBit 实现，只支持缩进映射、标量列表、纯标
 ## 旧会话线索迁移（阶段 08）
 
 `hunt_session_leads` 仍提供原有 JSONL 输入、`SessionLeadReport` 输出、严格字段校验、严重度门槛和 `LeadRejectionReason` 枚举。认证→进程→网络三段的接受判定现由内部编译的 `temporal_ordered` 规则与 `correlate_identity_safe` 完成：同主机、同启动周期、同会话，进程/网络需同一进程实例，三来源不同，窗口含端点。为保持旧 API 对**每个**候选三元组的结果及拒绝分类，包装层仍逐组三元组做兼容性校验，规则引擎负责最终接受；因此该入口不是通用批量引擎的吞吐基准。原始 JSONL 的身份只标记为来源声明（`Claimed`），旧 `SessionLead` 名称不表示身份已独立核验。外部规则文件仍需通过编译 API 加载；CLI 接入留待后续阶段。
+
+五套外部规则、输入及正反例见 [`correlation-fixtures.md`](correlation-fixtures.md)。

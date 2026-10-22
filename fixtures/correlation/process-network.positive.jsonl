@@ -1,0 +1,2 @@
+{"event_id":"process-1","host_id":"host-1","hostname":"host-1","platform":"windows","kind":"process","source":"sysmon","severity":"high","observed_at":100,"boot_id":"boot-1","pid":42,"process_started_at":100}
+{"event_id":"network-1","host_id":"host-1","hostname":"host-1","platform":"windows","kind":"network","source":"agent","severity":"high","observed_at":110,"boot_id":"boot-1","pid":42,"process_started_at":100}

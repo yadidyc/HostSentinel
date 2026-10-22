@@ -1,0 +1,1 @@
+[{"id":"connection","version":1,"detection":{"selection":{"class":"network_activity"},"condition":"selection"}},{"id":"distinct-destinations","version":1,"correlation":{"type":"value_count","rules":["connection"],"group-by":["host"],"timespan":"60s","condition":{"gte":3,"field":"dst_ip"},"identity":{"same":["boot"],"missing":"reject"}}}]
