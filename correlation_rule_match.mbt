@@ -15,6 +15,7 @@ pub struct SigmaCorrelationMatch {
   kind : CorrelationRuleKind
   group_key : String
   event_ids : Array[String]
+  matched_rule_ids : Array[String]
   sources : Array[String]
   events : Array[HostEvent]
   started_ms : Int64
@@ -51,6 +52,13 @@ pub fn SigmaCorrelationMatch::event_ids(
   self : SigmaCorrelationMatch,
 ) -> Array[String] {
   self.event_ids.copy()
+}
+
+///|
+pub fn SigmaCorrelationMatch::matched_rule_ids(
+  self : SigmaCorrelationMatch,
+) -> Array[String] {
+  self.matched_rule_ids.copy()
 }
 
 ///|
@@ -297,12 +305,14 @@ fn correlation_make_match(
   actual : Int32,
 ) -> SigmaCorrelationMatch {
   let event_ids : Array[String] = []
+  let matched_rule_ids : Array[String] = []
   let sources : Array[String] = []
   let events : Array[HostEvent] = []
   let mut started_ms = selected[0].time_ms
   let mut ended_ms = selected[0].time_ms
   for hit in selected {
     event_ids.push(hit.event.id.as_string())
+    matched_rule_ids.push(hit.rule_id)
     sources.push(source_token(hit.event.source))
     events.push(hit.event)
     if hit.time_ms < started_ms {
@@ -318,6 +328,7 @@ fn correlation_make_match(
     kind: rule.kind,
     group_key: selected[0].group_key,
     event_ids,
+    matched_rule_ids,
     sources,
     events,
     started_ms,
@@ -328,7 +339,10 @@ fn correlation_make_match(
 
 ///|
 fn correlation_match_key(result : SigmaCorrelationMatch) -> String {
-  let parts = [result.rule_id, result.group_key] + result.event_ids
+  let parts = [result.rule_id, result.group_key]
+  for event in result.events {
+    parts.push(correlation_event_key(event))
+  }
   parts.map(part => "\{part.length()}:\{part}").join("|")
 }
 
@@ -355,6 +369,15 @@ fn correlation_match_key(result : SigmaCorrelationMatch) -> String {
 pub fn match_correlation_rule(
   rule : CompiledCorrelationRule,
   events : Array[HostEvent],
+) -> Array[SigmaCorrelationMatch] raise CorrelationRuleError {
+  correlation_match_rule_limited(rule, events, 2147483647)
+}
+
+///|
+fn correlation_match_rule_limited(
+  rule : CompiledCorrelationRule,
+  events : Array[HostEvent],
+  max_candidates : Int32,
 ) -> Array[SigmaCorrelationMatch] raise CorrelationRuleError {
   let groups = correlation_hits(rule, events)
   let group_keys = groups.keys().to_array()
@@ -388,6 +411,11 @@ pub fn match_correlation_rule(
         let result = correlation_make_match(rule, selected, actual)
         let key = correlation_match_key(result)
         if !seen_matches.contains(key) {
+          if matches.length() >= max_candidates {
+            raise rule_invalid(
+              "limits.max_candidates", "candidate budget exceeded",
+            )
+          }
           seen_matches[key] = true
           matches.push(result)
         }

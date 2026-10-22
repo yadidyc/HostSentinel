@@ -70,6 +70,43 @@
         "additionalProperties": { "$ref": "#/$defs/eventField" }
       }
     },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "same": {
+          "type": "array", "uniqueItems": true,
+          "items": { "enum": ["host", "boot", "user", "session", "process", "parent_process", "source_id"] }
+        },
+        "same-between": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["field", "rules"],
+            "properties": {
+              "field": { "enum": ["host", "boot", "user", "session", "process", "parent_process", "source_id"] },
+              "rules": {
+                "type": "array", "minItems": 2, "uniqueItems": true,
+                "items": { "$ref": "#/$defs/nonempty" }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "missing": { "enum": ["reject", "indeterminate", "relaxed"] },
+        "sources": { "enum": ["any", "same", "different"] },
+        "parent-child": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["parent", "child"],
+            "properties": {
+              "parent": { "$ref": "#/$defs/nonempty" },
+              "child": { "$ref": "#/$defs/nonempty" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "correlation": {
       "type": "object",
       "required": ["type", "rules", "timespan"],
@@ -85,7 +122,8 @@
         },
         "timespan": { "type": "string", "pattern": "^[1-9][0-9]*[smhdw]$" },
         "condition": { "$ref": "#/$defs/condition" },
-        "aliases": { "$ref": "#/$defs/aliases" }
+        "aliases": { "$ref": "#/$defs/aliases" },
+        "identity": { "$ref": "#/$defs/identity" }
       },
       "additionalProperties": false
     }

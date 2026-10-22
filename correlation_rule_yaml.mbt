@@ -114,10 +114,39 @@ fn rule_yaml_block(
       if !line.text.has_prefix("- ") {
         raise rule_invalid("yaml:\{line.number}", "mixed sequence and mapping")
       }
-      items.push(
-        rule_yaml_scalar(line.text[2:].trim().to_owned(), "yaml:\{line.number}"),
-      )
+      let item_text = line.text[2:].trim().to_owned()
       index += 1
+      if item_text.contains(":") {
+        let fields : Map[String, Json] = Map([])
+        let (key, value) = rule_yaml_key_value(item_text, "yaml:\{line.number}")
+        if value == "" {
+          raise rule_invalid(
+            "yaml:\{line.number}",
+            "sequence mapping requires scalar first value",
+          )
+        }
+        fields[key] = rule_yaml_scalar(value, "yaml:\{line.number}")
+        if index < lines.length() && lines[index].indent > indent {
+          let (continuation, next) = rule_yaml_block(lines, index)
+          for
+            child_key, child_value in rule_object(
+              continuation,
+              "yaml:\{line.number}",
+            ) {
+            if fields.contains(child_key) {
+              raise rule_invalid(
+                "yaml:\{line.number}",
+                "duplicate sequence mapping key",
+              )
+            }
+            fields[child_key] = child_value
+          }
+          index = next
+        }
+        items.push(Json::object(fields))
+      } else {
+        items.push(rule_yaml_scalar(item_text, "yaml:\{line.number}"))
+      }
     }
     return (Json::array(items), index)
   }

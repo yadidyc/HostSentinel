@@ -256,6 +256,9 @@ fn rule_aliases(
     None => return aliases
     Some(raw) =>
       for name, mapping in rule_object(raw, "\{path}.aliases") {
+        if name.trim() == "" {
+          raise rule_invalid("\{path}.aliases", "empty alias name")
+        }
         if rule_field_known(name) {
           raise rule_invalid(
             "\{path}.aliases.\{name}",
@@ -317,6 +320,138 @@ fn rule_virtual_field_known(
 }
 
 ///|
+fn rule_identity_config(
+  corr : Json,
+  path : String,
+  references : Array[String],
+) -> (
+  Array[String],
+  Array[ScopedIdentityConstraint],
+  IdentityMissingPolicy,
+  SourceConstraint,
+  Array[ParentChildLink],
+) raise CorrelationRuleError {
+  let raw = match json_field(corr, "identity") {
+    Some(value) => value
+    None =>
+      return (
+        ["host"],
+        [],
+        IdentityMissingPolicy::Reject,
+        SourceConstraint::AnySource,
+        [],
+      )
+  }
+  rule_allowed(raw, path, [
+    "same", "same-between", "missing", "sources", "parent-child",
+  ])
+  let same = match json_field(raw, "same") {
+    Some(value) => rule_string_list(value, "\{path}.same")
+    None => []
+  }
+  for field in same {
+    if ![
+        "host", "boot", "user", "session", "process", "parent_process", "source_id",
+      ].contains(field) {
+      raise rule_invalid("\{path}.same", "unknown identity field: \{field}")
+    }
+  }
+  if !same.contains("host") {
+    same.insert(0, "host")
+  }
+  let same_between : Array[ScopedIdentityConstraint] = []
+  match json_field(raw, "same-between") {
+    None => ()
+    Some(Array(items)) =>
+      for index, item in items {
+        let item_path = "\{path}.same-between[\{index}]"
+        rule_allowed(item, item_path, ["field", "rules"])
+        let field = rule_text(
+          rule_required(item, "field", item_path),
+          "\{item_path}.field",
+        )
+        if ![
+            "host", "boot", "user", "session", "process", "parent_process", "source_id",
+          ].contains(field) {
+          raise rule_invalid("\{item_path}.field", "unknown identity field")
+        }
+        let roles = rule_string_list(
+          rule_required(item, "rules", item_path),
+          "\{item_path}.rules",
+        )
+        if roles.length() < 2 {
+          raise rule_invalid(
+            "\{item_path}.rules",
+            "at least two roles required",
+          )
+        }
+        for role in roles {
+          if !references.contains(role) {
+            raise rule_invalid(
+              "\{item_path}.rules",
+              "unknown rule reference: \{role}",
+            )
+          }
+        }
+        same_between.push({ field, rules: roles, })
+      }
+    Some(_) => raise rule_invalid("\{path}.same-between", "expected array")
+  }
+  let missing_policy = match json_field(raw, "missing") {
+    None => IdentityMissingPolicy::Reject
+    Some(value) =>
+      match rule_text(value, "\{path}.missing") {
+        "reject" => IdentityMissingPolicy::Reject
+        "indeterminate" => IdentityMissingPolicy::Indeterminate
+        "relaxed" => IdentityMissingPolicy::Relaxed
+        _ =>
+          raise rule_invalid(
+            "\{path}.missing",
+            "expected reject/indeterminate/relaxed",
+          )
+      }
+  }
+  let source_constraint = match json_field(raw, "sources") {
+    None => SourceConstraint::AnySource
+    Some(value) =>
+      match rule_text(value, "\{path}.sources") {
+        "any" => SourceConstraint::AnySource
+        "same" => SourceConstraint::SameSource
+        "different" => SourceConstraint::DifferentSources
+        _ =>
+          raise rule_invalid("\{path}.sources", "expected any/same/different")
+      }
+  }
+  let links : Array[ParentChildLink] = []
+  match json_field(raw, "parent-child") {
+    None => ()
+    Some(Array(items)) =>
+      for index, item in items {
+        let item_path = "\{path}.parent-child[\{index}]"
+        rule_allowed(item, item_path, ["parent", "child"])
+        let parent = rule_text(
+          rule_required(item, "parent", item_path),
+          "\{item_path}.parent",
+        )
+        let child = rule_text(
+          rule_required(item, "child", item_path),
+          "\{item_path}.child",
+        )
+        if parent == child ||
+          !references.contains(parent) ||
+          !references.contains(child) {
+          raise rule_invalid(
+            item_path, "parent and child must be distinct referenced rules",
+          )
+        }
+        links.push({ parent, child, })
+      }
+    Some(_) => raise rule_invalid("\{path}.parent-child", "expected array")
+  }
+  (same, same_between, missing_policy, source_constraint, links)
+}
+
+///|
 fn rule_compile_correlation(
   value : Json,
   path : String,
@@ -330,7 +465,7 @@ fn rule_compile_correlation(
   )
   let corr = rule_required(value, "correlation", path)
   rule_allowed(corr, "\{path}.correlation", [
-    "type", "rules", "group-by", "timespan", "aliases", "condition",
+    "type", "rules", "group-by", "timespan", "aliases", "condition", "identity",
   ])
   let kind = rule_kind(
     rule_required(corr, "type", "\{path}.correlation"),
@@ -391,6 +526,13 @@ fn rule_compile_correlation(
       )
     _ => ()
   }
+  let (
+    same_identities,
+    same_between,
+    missing_policy,
+    source_constraint,
+    parent_child,
+  ) = rule_identity_config(corr, "\{path}.correlation.identity", references)
   {
     id,
     version,
@@ -403,6 +545,11 @@ fn rule_compile_correlation(
     operator,
     threshold,
     value_field,
+    same_identities,
+    same_between,
+    missing_policy,
+    source_constraint,
+    parent_child,
   }
 }
 
@@ -485,6 +632,10 @@ fn rule_compile_documents(
       rule_required(document, "version", path),
       "\{path}.version",
     )
+    match json_field(document, "title") {
+      Some(raw) => ignore(rule_text(raw, "\{path}.title"))
+      None => ()
+    }
     let reference = match json_field(document, "name") {
       Some(raw) => rule_text(raw, "\{path}.name")
       None => id

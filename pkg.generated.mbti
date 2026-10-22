@@ -12,6 +12,8 @@ pub fn compile_correlation_rules_yaml(String) -> Array[CompiledCorrelationRule] 
 
 pub fn correlate(CorrelationPattern, Array[EventObservation]) -> Array[Detection]
 
+pub fn correlate_identity_safe(CompiledCorrelationRule, Array[HostEvent], max_events? : Int, max_candidates? : Int, max_results? : Int, max_diagnostics? : Int, diagnostic? : Bool) -> IdentityCorrelationReport raise CorrelationRuleError
+
 pub fn dry_run_response(ResponsePlan, Alert) -> DryRunReport
 
 pub fn evaluate_rule(Rule, NormalizedEvent, Array[String]) -> RuleHit?
@@ -250,12 +252,24 @@ pub struct CompiledCorrelationRule {
   operator : CountOperator?
   threshold : Int?
   value_field : String?
+  same_identities : Array[String]
+  same_between : Array[ScopedIdentityConstraint]
+  missing_policy : IdentityMissingPolicy
+  source_constraint : SourceConstraint
+  parent_child : Array[ParentChildLink]
 }
 pub fn CompiledCorrelationRule::id(Self) -> String
 pub fn CompiledCorrelationRule::kind(Self) -> CorrelationRuleKind
+pub fn CompiledCorrelationRule::missing_policy(Self) -> IdentityMissingPolicy
 pub fn CompiledCorrelationRule::rule_ids(Self) -> Array[String]
 pub fn CompiledCorrelationRule::version(Self) -> Int
 pub fn CompiledCorrelationRule::window_ms(Self) -> Int64
+
+pub(all) struct CorrelationKeyEvidence {
+  field : String
+  value : String
+  status : IdentityStatus
+}
 
 pub struct CorrelationPattern {
   id : String
@@ -525,6 +539,72 @@ pub fn Identity::unverified(String) -> Self raise HostEventError
 pub fn Identity::value(Self) -> String?
 pub fn Identity::verified(String) -> Self raise HostEventError
 
+pub struct IdentityCorrelationDiagnostic {
+  event_ids : Array[String]
+  reason : String
+}
+pub fn IdentityCorrelationDiagnostic::event_ids(Self) -> Array[String]
+pub fn IdentityCorrelationDiagnostic::reason(Self) -> String
+
+pub struct IdentityCorrelationReport {
+  results : Array[IdentityCorrelationResult]
+  diagnostics : Array[IdentityCorrelationDiagnostic]
+  examined_candidates : Int
+  results_truncated : Bool
+  diagnostics_truncated : Bool
+}
+pub fn IdentityCorrelationReport::diagnostics(Self) -> Array[IdentityCorrelationDiagnostic]
+pub fn IdentityCorrelationReport::diagnostics_truncated(Self) -> Bool
+pub fn IdentityCorrelationReport::examined_candidates(Self) -> Int
+pub fn IdentityCorrelationReport::results(Self) -> Array[IdentityCorrelationResult]
+pub fn IdentityCorrelationReport::results_truncated(Self) -> Bool
+
+pub struct IdentityCorrelationResult {
+  rule_id : String
+  rule_version : Int
+  event_ids : Array[String]
+  sources : Array[String]
+  group_key : String
+  keys : Array[CorrelationKeyEvidence]
+  window_ms : Int64
+  span_ms : Int64
+  grade : IdentityEvidenceGrade
+  mapping : Array[String]
+  explanation : String
+  dedup_key : String
+}
+pub fn IdentityCorrelationResult::dedup_key(Self) -> String
+pub fn IdentityCorrelationResult::event_ids(Self) -> Array[String]
+pub fn IdentityCorrelationResult::explanation(Self) -> String
+pub fn IdentityCorrelationResult::grade(Self) -> IdentityEvidenceGrade
+pub fn IdentityCorrelationResult::group_key(Self) -> String
+pub fn IdentityCorrelationResult::keys(Self) -> Array[CorrelationKeyEvidence]
+pub fn IdentityCorrelationResult::mapping(Self) -> Array[String]
+pub fn IdentityCorrelationResult::rule_id(Self) -> String
+pub fn IdentityCorrelationResult::rule_version(Self) -> Int
+pub fn IdentityCorrelationResult::sources(Self) -> Array[String]
+pub fn IdentityCorrelationResult::span_ms(Self) -> Int64
+pub fn IdentityCorrelationResult::window_ms(Self) -> Int64
+
+pub(all) enum IdentityEvidenceGrade {
+  Verified
+  Claimed
+  Weak
+  Indeterminate
+} derive(Eq, @debug.Debug)
+pub fn IdentityEvidenceGrade::equal(Self, Self) -> Bool
+pub fn IdentityEvidenceGrade::not_equal(Self, Self) -> Bool
+pub fn IdentityEvidenceGrade::to_repr(Self) -> @debug.Repr
+
+pub(all) enum IdentityMissingPolicy {
+  Reject
+  Indeterminate
+  Relaxed
+} derive(Eq, @debug.Debug)
+pub fn IdentityMissingPolicy::equal(Self, Self) -> Bool
+pub fn IdentityMissingPolicy::not_equal(Self, Self) -> Bool
+pub fn IdentityMissingPolicy::to_repr(Self) -> @debug.Repr
+
 pub(all) enum IdentityStatus {
   Missing
   Unknown
@@ -662,6 +742,11 @@ pub fn OriginalEventReference::equal(Self, Self) -> Bool
 pub fn OriginalEventReference::not_equal(Self, Self) -> Bool
 pub fn OriginalEventReference::to_repr(Self) -> @debug.Repr
 
+pub(all) struct ParentChildLink {
+  parent : String
+  child : String
+}
+
 pub struct ResponseAction {
   id : String
   kind : ResponseActionKind
@@ -768,6 +853,11 @@ pub fn RuleHit::rule_id(Self) -> String
 pub fn RuleHit::rule_version(Self) -> Int
 pub fn RuleHit::to_repr(Self) -> @debug.Repr
 
+pub(all) struct ScopedIdentityConstraint {
+  field : String
+  rules : Array[String]
+}
+
 pub struct SecurityEvent {
   id : EventId
   host_id : HostId
@@ -824,6 +914,7 @@ pub struct SigmaCorrelationMatch {
   kind : CorrelationRuleKind
   group_key : String
   event_ids : Array[String]
+  matched_rule_ids : Array[String]
   sources : Array[String]
   events : Array[HostEvent]
   started_ms : Int64
@@ -834,11 +925,21 @@ pub fn SigmaCorrelationMatch::ended_ms(Self) -> Int64
 pub fn SigmaCorrelationMatch::event_ids(Self) -> Array[String]
 pub fn SigmaCorrelationMatch::group_key(Self) -> String
 pub fn SigmaCorrelationMatch::kind(Self) -> CorrelationRuleKind
+pub fn SigmaCorrelationMatch::matched_rule_ids(Self) -> Array[String]
 pub fn SigmaCorrelationMatch::observed_count(Self) -> Int
 pub fn SigmaCorrelationMatch::rule_id(Self) -> String
 pub fn SigmaCorrelationMatch::rule_version(Self) -> Int
 pub fn SigmaCorrelationMatch::sources(Self) -> Array[String]
 pub fn SigmaCorrelationMatch::started_ms(Self) -> Int64
+
+pub(all) enum SourceConstraint {
+  AnySource
+  SameSource
+  DifferentSources
+} derive(Eq, @debug.Debug)
+pub fn SourceConstraint::equal(Self, Self) -> Bool
+pub fn SourceConstraint::not_equal(Self, Self) -> Bool
+pub fn SourceConstraint::to_repr(Self) -> @debug.Repr
 
 pub(all) enum TimePrecision {
   Seconds

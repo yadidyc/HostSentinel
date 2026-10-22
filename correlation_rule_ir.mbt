@@ -30,6 +30,44 @@ pub extend CountOperator with Eq::{equal, not_equal}
 pub extend CountOperator with @debug.Debug::{to_repr}
 
 ///|
+pub(all) enum IdentityMissingPolicy {
+  Reject
+  Indeterminate
+  Relaxed
+} derive(Debug, Eq)
+
+///|
+pub extend IdentityMissingPolicy with Eq::{equal, not_equal}
+
+///|
+pub extend IdentityMissingPolicy with @debug.Debug::{to_repr}
+
+///|
+pub(all) enum SourceConstraint {
+  AnySource
+  SameSource
+  DifferentSources
+} derive(Debug, Eq)
+
+///|
+pub extend SourceConstraint with Eq::{equal, not_equal}
+
+///|
+pub extend SourceConstraint with @debug.Debug::{to_repr}
+
+///|
+pub(all) struct ParentChildLink {
+  parent : String
+  child : String
+}
+
+///|
+pub(all) struct ScopedIdentityConstraint {
+  field : String
+  rules : Array[String]
+}
+
+///|
 /// A rule-file error with a path into the input document.
 pub(all) suberror CorrelationRuleError {
   Invalid(path~ : String, detail~ : String)
@@ -75,6 +113,11 @@ pub struct CompiledCorrelationRule {
   operator : CountOperator?
   threshold : Int32?
   value_field : String?
+  same_identities : Array[String]
+  same_between : Array[ScopedIdentityConstraint]
+  missing_policy : IdentityMissingPolicy
+  source_constraint : SourceConstraint
+  parent_child : Array[ParentChildLink]
 }
 
 ///|
@@ -108,4 +151,11 @@ pub fn CompiledCorrelationRule::window_ms(
   self : CompiledCorrelationRule,
 ) -> Int64 {
   self.window_ms
+}
+
+///|
+pub fn CompiledCorrelationRule::missing_policy(
+  self : CompiledCorrelationRule,
+) -> IdentityMissingPolicy {
+  self.missing_policy
 }
