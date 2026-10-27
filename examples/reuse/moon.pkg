@@ -1,0 +1,3 @@
+import {
+  "yadidyc/hostsentinel/eventcorr",
+} for "test"

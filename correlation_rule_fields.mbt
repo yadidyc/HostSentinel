@@ -81,19 +81,3 @@ fn correlation_time_ms(
     }
   }
 }
-
-///|
-fn correlation_compare_count(
-  operator : CountOperator,
-  actual : Int32,
-  expected : Int32,
-) -> Bool {
-  match operator {
-    CountOperator::Gt => actual > expected
-    CountOperator::Gte => actual >= expected
-    CountOperator::Lt => actual < expected
-    CountOperator::Lte => actual <= expected
-    CountOperator::Eq => actual == expected
-    CountOperator::Neq => actual != expected
-  }
-}

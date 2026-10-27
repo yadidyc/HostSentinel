@@ -4,9 +4,15 @@ HostSentinel 是 MoonBit 实现的离线主机遥测规范化与身份安全关�
 
 仅按相同主机与时间窗口组合事件，可能把重启后的会话、重用的 PID 或不同进程误连。关联引擎要求规则明确约束身份；身份缺失默认拒绝，并标记证据等级。五套合成正反例见[案例说明](docs/correlation-fixtures.md)。
 
+## 可独立复用的事件关联内核
+
+`yadidyc/hostsentinel/eventcorr` 是不依赖 `HostEvent`、主机字段、文件 I/O 或安全规则语法的 MoonBit 包。调用者把任意领域的记录映射成带稳定事件键、角色、来源、毫秒时间和分组键的 `Hit`；同一个 `correlate` 入口执行含端点的滑动窗口、事件数/不同值计数、无序/有序多角色关联，返回可追溯的事件键、角色、来源和时间跨度。主机规则引擎也调用这一内核生成候选，再单独执行启动周期、会话、进程实例等身份核验；不是另做一套演示算法。
+
+[独立消费包](examples/reuse/)用订单→付款和服务告警突增两种非安全领域输入调用公开 API，分别覆盖有序序列与计数；`moon test examples/reuse` 可直接复现。主机侧另有[五套正反例](docs/correlation-fixtures.md)。接口、分层、可复用范围及限制见[事件关联库说明](docs/event-correlation-library.md)。
+
 ## 开始使用
 
-安装 MoonBit 工具链后，在仓库根目录执行。文件型 CLI 依赖异步文件系统，命令包仅支持 native 目标；核心库仍可在四种后端构建与测试。原有 `hunt`、`ingest`、`leads`、`alerts`、`case`、`plan`、`explain --event` 和 `response dry-run` 在 native CLI 中仍可用：
+建议使用与 [CI](.github/workflows/ci.yml) 一致的 MoonBit 编译器 `0.10.17+093cb8f9c`；较旧的 `0.10.14` 无法解析当前异步依赖的 `moon.pkg`。在仓库根目录执行以下命令。文件型 CLI 依赖异步文件系统，命令包仅支持 native 目标；核心库仍可在四种后端构建与测试。原有 `hunt`、`ingest`、`leads`、`alerts`、`case`、`plan`、`explain --event` 和 `response dry-run` 在 native CLI 中仍可用：
 
 ```sh
 moon fmt

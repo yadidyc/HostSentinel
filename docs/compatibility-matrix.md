@@ -16,6 +16,7 @@
 | CLI 文件输入 | `normalize`、`rules validate`、`correlate`、`explain --rule-file`、`benchmark` 从本地文件读取；`--json`/`--jsonl`，错误非零退出 | 远程 URL、流式摄取、数据库/守护进程；`benchmark` 不计算真值准确率 |
 | CLI 兼容 | 旧 `ingest/hunt/leads/alerts/case/plan/explain --event/response dry-run` 保留；`leads` 接受判定委托通用引擎 | 旧入口只处理固定会话三段，不是独立于新引擎的性能基线 |
 | 库组合接口 | 规范化：`normalize_jsonl`→`host_event_from_normalized`、`normalize_ocsf_jsonl`、三个原生适配器；验证/编译：`compile_correlation_rules_json/yaml`；关联/解释：`correlate_identity_safe` 的结果、`explanation()` 与诊断 | 未另设 `validate_rule`/`explain` 同名包装 API；使用所列可组合入口 |
+| 独立关联包 | `yadidyc/hostsentinel/eventcorr` 接受调用者分类的 `Hit`，提供四类离线候选关联及证据见证；主机规则匹配复用同一内核 | 不解析任意原始事件 Schema；角色、分组键及 `value_count` 取值由调用者映射，主机身份核验仍由根包负责 |
 | 构建与运行 | 核心库 `native/js/wasm/wasm-gc` 检查与测试；CLI 包声明仅支持 native，文件级集成在 native 实测 | CLI 依赖本地异步文件系统，不能在 JS/wasm/wasm-gc 目标运行；不声称浏览器/沙箱具备文件权限 |
 | 资源与响应 | 离线批处理，事件/候选/结果/诊断预算；超限报错或显式截断；响应仅 dry-run | 无持久化/流式状态、真实隔离/通知；[实验](benchmark-methodology.md)尚无可靠峰值内存值 |
 

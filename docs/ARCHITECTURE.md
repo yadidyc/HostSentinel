@@ -10,6 +10,8 @@ HostSentinel 是一个以 MoonBit 核心库为中心的主机威胁狩猎与响�
 
 当前版本没有常驻采集器、数据库、网络服务或真实响应执行器。CLI 与领域库之间没有隐式状态，调用方负责提供事件、规则、关联模式和响应计划。
 
+可配置关联另有明确的包边界：`eventcorr` 只执行已分类事件的分组、含端点时间窗、计数及多角色序列匹配；根包将 `HostEvent` 与外部规则映射为通用 `Hit`，消费候选后再做主机身份安全校验。订单和服务监控的[独立消费测试](../examples/reuse/)只依赖 `eventcorr`，证明该内核不以主机字段为前提；契约和限制见[事件关联库说明](event-correlation-library.md)。下文的旧 `correlate`/`leads` 流程仍是兼容入口，不代表通用包自动理解所有原始日志。
+
 ## 2. 数据流
 
 ```text
@@ -29,6 +31,8 @@ JSONL
 
 根包 `yadidyc/hostsentinel` 是领域库，`cmd/main` 是 CLI 可执行包。
 
+`eventcorr` 是独立可导入的纯关联包，`examples/reuse` 是不导入根包的消费测试包。
+
 | 文件 | 职责 |
 | --- | --- |
 | `model.mbt` | 主机、事件 ID、时间、事件类型、来源和严重性等基础值对象。 |
@@ -36,6 +40,7 @@ JSONL
 | `ioc.mbt` | 规范化 IOC 值并提供单个或批量 IOC 匹配。 |
 | `rule.mbt` | 定义版本化规则、条件组合和 `RuleHit` 证据。 |
 | `correlation.mbt` | 按主机、顺序和时间窗口把规则命中关联为 `Detection`。 |
+| `eventcorr/` 与 `correlation_rule_match.mbt` | 通用候选窗口/计数/序列内核及主机事件到内核输入的适配。 |
 | `session_lead.mbt` | 按启动周期、登录会话、进程实例及独立来源验证登录→进程→网络候选链。 |
 | `risk_alert.mbt` | 根据关联事件严重性计算风险分数，并维护告警状态转换。 |
 | `case.mbt` | 将告警绑定到案件，追加证据并记录有序审计轨迹。 |

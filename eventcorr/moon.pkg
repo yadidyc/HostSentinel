@@ -1,0 +1,4 @@
+// Domain-neutral, synchronous correlation kernel. No host or IO imports.
+import {
+  "moonbitlang/core/debug",
+}

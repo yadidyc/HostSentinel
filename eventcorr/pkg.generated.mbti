@@ -1,0 +1,87 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "yadidyc/hostsentinel/eventcorr"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn correlate(Rule, Array[Hit], max_candidates? : Int32) -> Array[Candidate] raise CorrelationError
+
+// Errors
+pub(all) suberror CorrelationError {
+  Invalid(String)
+} derive(Eq, @debug.Debug)
+pub fn CorrelationError::equal(Self, Self) -> Bool
+pub fn CorrelationError::not_equal(Self, Self) -> Bool
+pub fn CorrelationError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub struct Candidate {
+  group_key : String
+  hit_indices : Array[Int32]
+  event_keys : Array[String]
+  roles : Array[String]
+  sources : Array[String]
+  started_ms : Int64
+  ended_ms : Int64
+  observed_count : Int32
+}
+pub fn Candidate::ended_ms(Self) -> Int64
+pub fn Candidate::event_keys(Self) -> Array[String]
+pub fn Candidate::group_key(Self) -> String
+pub fn Candidate::hit_indices(Self) -> Array[Int32]
+pub fn Candidate::observed_count(Self) -> Int32
+pub fn Candidate::roles(Self) -> Array[String]
+pub fn Candidate::sources(Self) -> Array[String]
+pub fn Candidate::started_ms(Self) -> Int64
+
+pub(all) enum CountOperator {
+  Gt
+  Gte
+  Lt
+  Lte
+  Eq
+  Neq
+} derive(Eq, @debug.Debug)
+pub fn CountOperator::equal(Self, Self) -> Bool
+pub fn CountOperator::not_equal(Self, Self) -> Bool
+pub fn CountOperator::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Hit {
+  event_key : String
+  role : String
+  source : String
+  time_ms : Int64
+  group_key : String
+  value : String?
+} derive(Eq, @debug.Debug)
+pub fn Hit::equal(Self, Self) -> Bool
+pub fn Hit::not_equal(Self, Self) -> Bool
+pub fn Hit::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Kind {
+  EventCount
+  ValueCount
+  Temporal
+  TemporalOrdered
+} derive(Eq, @debug.Debug)
+pub fn Kind::equal(Self, Self) -> Bool
+pub fn Kind::not_equal(Self, Self) -> Bool
+pub fn Kind::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Rule {
+  id : String
+  kind : Kind
+  roles : Array[String]
+  window_ms : Int64
+  operator : CountOperator?
+  threshold : Int32?
+} derive(Eq, @debug.Debug)
+pub fn Rule::equal(Self, Self) -> Bool
+pub fn Rule::not_equal(Self, Self) -> Bool
+pub fn Rule::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

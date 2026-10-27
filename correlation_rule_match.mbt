@@ -136,169 +136,6 @@ fn correlation_hits(
 }
 
 ///|
-fn correlation_hit_order(
-  a : CorrelationRuleHit,
-  b : CorrelationRuleHit,
-) -> Int32 {
-  let time_order = a.time_ms.compare(b.time_ms)
-  if time_order != 0 {
-    return time_order
-  }
-  let event_order = a.event_key.compare(b.event_key)
-  if event_order != 0 {
-    return event_order
-  }
-  a.rule_id.compare(b.rule_id)
-}
-
-///|
-fn correlation_window_end(start : Int64, duration : Int64) -> Int64 {
-  let max : Int64 = 9223372036854775807
-  if start > max - duration {
-    max
-  } else {
-    start + duration
-  }
-}
-
-///|
-fn correlation_window(
-  hits : Array[CorrelationRuleHit],
-  start : Int32,
-  duration : Int64,
-) -> Array[CorrelationRuleHit] {
-  let selected : Array[CorrelationRuleHit] = []
-  let end_time = correlation_window_end(hits[start].time_ms, duration)
-  for index in start..<hits.length() {
-    if hits[index].time_ms > end_time {
-      break
-    }
-    selected.push(hits[index])
-  }
-  selected
-}
-
-///|
-fn correlation_count_witness(
-  rule : CompiledCorrelationRule,
-  window : Array[CorrelationRuleHit],
-) -> (Array[CorrelationRuleHit], Int32) {
-  let selected : Array[CorrelationRuleHit] = []
-  let seen : Map[String, Bool] = Map([])
-  for hit in window {
-    let key = match rule.kind {
-      CorrelationRuleKind::ValueCount => {
-        let field = correlation_resolve_field(
-          rule,
-          hit.rule_id,
-          rule.value_field.unwrap(),
-        )
-        match correlation_event_field(hit.event, field) {
-          Some(value) => "\{value.length()}:\{value}"
-          None => continue
-        }
-      }
-      _ => hit.event_key
-    }
-    if !seen.contains(key) {
-      seen[key] = true
-      selected.push(hit)
-    }
-  }
-  (selected, selected.length())
-}
-
-///|
-fn correlation_temporal_witness(
-  rule : CompiledCorrelationRule,
-  window : Array[CorrelationRuleHit],
-) -> (Array[CorrelationRuleHit], Int32) {
-  if rule.kind == CorrelationRuleKind::Temporal {
-    return correlation_unordered_witness(rule, window)
-  }
-  let selected : Array[CorrelationRuleHit] = []
-  let seen_events : Map[String, Bool] = Map([])
-  let mut last_time = window[0].time_ms
-  for rule_id in rule.rule_ids {
-    let mut found : CorrelationRuleHit? = None
-    for hit in window {
-      if hit.rule_id == rule_id &&
-        !seen_events.contains(hit.event_key) &&
-        (
-          rule.kind != CorrelationRuleKind::TemporalOrdered ||
-          hit.time_ms >= last_time
-        ) {
-        found = Some(hit)
-        break
-      }
-    }
-    match found {
-      Some(hit) => {
-        selected.push(hit)
-        seen_events[hit.event_key] = true
-        last_time = hit.time_ms
-      }
-      None => break
-    }
-  }
-  (selected, selected.length())
-}
-
-///|
-fn correlation_assign_unordered(
-  rule_index : Int32,
-  rule : CompiledCorrelationRule,
-  window : Array[CorrelationRuleHit],
-  assigned : Map[String, Int32],
-  visited : Map[String, Bool],
-) -> Bool {
-  for hit in window {
-    if hit.rule_id != rule.rule_ids[rule_index] ||
-      visited.contains(hit.event_key) {
-      continue
-    }
-    visited[hit.event_key] = true
-    let available = match assigned.get(hit.event_key) {
-      None => true
-      Some(other_rule) =>
-        correlation_assign_unordered(
-          other_rule, rule, window, assigned, visited,
-        )
-    }
-    if available {
-      assigned[hit.event_key] = rule_index
-      return true
-    }
-  }
-  false
-}
-
-///|
-fn correlation_unordered_witness(
-  rule : CompiledCorrelationRule,
-  window : Array[CorrelationRuleHit],
-) -> (Array[CorrelationRuleHit], Int32) {
-  let assigned : Map[String, Int32] = Map([])
-  for rule_index in 0..<rule.rule_ids.length() {
-    let visited : Map[String, Bool] = Map([])
-    ignore(
-      correlation_assign_unordered(rule_index, rule, window, assigned, visited),
-    )
-  }
-  let selected : Array[CorrelationRuleHit] = []
-  for rule_index in 0..<rule.rule_ids.length() {
-    for hit in window {
-      if hit.rule_id == rule.rule_ids[rule_index] &&
-        assigned.get(hit.event_key) == Some(rule_index) {
-        selected.push(hit)
-        break
-      }
-    }
-  }
-  (selected, selected.length())
-}
-
-///|
 fn correlation_make_match(
   rule : CompiledCorrelationRule,
   selected : Array[CorrelationRuleHit],
@@ -382,44 +219,83 @@ fn correlation_match_rule_limited(
   let groups = correlation_hits(rule, events)
   let group_keys = groups.keys().to_array()
   group_keys.sort()
+  let indexed_hits : Array[CorrelationRuleHit] = []
+  let generic_hits : Array[@eventcorr.Hit] = []
+  for group_key in group_keys {
+    for hit in groups[group_key] {
+      let value = match rule.kind {
+        CorrelationRuleKind::ValueCount => {
+          let field = correlation_resolve_field(
+            rule,
+            hit.rule_id,
+            rule.value_field.unwrap(),
+          )
+          correlation_event_field(hit.event, field)
+        }
+        _ => None
+      }
+      indexed_hits.push(hit)
+      generic_hits.push({
+        event_key: hit.event_key,
+        role: hit.rule_id,
+        source: source_token(hit.event.source),
+        time_ms: hit.time_ms,
+        group_key,
+        value,
+      })
+    }
+  }
+  let kind = match rule.kind {
+    CorrelationRuleKind::EventCount => @eventcorr.Kind::EventCount
+    CorrelationRuleKind::ValueCount => @eventcorr.Kind::ValueCount
+    CorrelationRuleKind::Temporal => @eventcorr.Kind::Temporal
+    CorrelationRuleKind::TemporalOrdered => @eventcorr.Kind::TemporalOrdered
+  }
+  let operator = rule.operator.map(op => {
+    match op {
+      CountOperator::Gt => @eventcorr.CountOperator::Gt
+      CountOperator::Gte => @eventcorr.CountOperator::Gte
+      CountOperator::Lt => @eventcorr.CountOperator::Lt
+      CountOperator::Lte => @eventcorr.CountOperator::Lte
+      CountOperator::Eq => @eventcorr.CountOperator::Eq
+      CountOperator::Neq => @eventcorr.CountOperator::Neq
+    }
+  })
+  let generic_rule : @eventcorr.Rule = {
+    id: rule.id,
+    kind,
+    roles: rule.rule_ids,
+    window_ms: rule.window_ms,
+    operator,
+    threshold: rule.threshold,
+  }
+  let candidates = @eventcorr.correlate(
+    generic_rule,
+    generic_hits,
+    max_candidates~,
+  ) catch {
+    @eventcorr.CorrelationError::Invalid(detail) => {
+      let path = if detail == "candidate budget exceeded" {
+        "limits.max_candidates"
+      } else {
+        "correlation"
+      }
+      raise rule_invalid(path, detail)
+    }
+  }
   let matches : Array[SigmaCorrelationMatch] = []
   let seen_matches : Map[String, Bool] = Map([])
-  for group_key in group_keys {
-    let hits = groups[group_key]
-    hits.sort_by(correlation_hit_order)
-    for start in 0..<hits.length() {
-      if rule.kind == CorrelationRuleKind::TemporalOrdered &&
-        hits[start].rule_id != rule.rule_ids[0] {
-        continue
-      }
-      let window = correlation_window(hits, start, rule.window_ms)
-      let (selected, actual) = match rule.kind {
-        CorrelationRuleKind::EventCount | CorrelationRuleKind::ValueCount =>
-          correlation_count_witness(rule, window)
-        CorrelationRuleKind::Temporal | CorrelationRuleKind::TemporalOrdered =>
-          correlation_temporal_witness(rule, window)
-      }
-      if selected.is_empty() {
-        continue
-      }
-      let passed = match (rule.operator, rule.threshold) {
-        (Some(op), Some(expected)) =>
-          correlation_compare_count(op, actual, expected)
-        _ => actual == rule.rule_ids.length()
-      }
-      if passed {
-        let result = correlation_make_match(rule, selected, actual)
-        let key = correlation_match_key(result)
-        if !seen_matches.contains(key) {
-          if matches.length() >= max_candidates {
-            raise rule_invalid(
-              "limits.max_candidates", "candidate budget exceeded",
-            )
-          }
-          seen_matches[key] = true
-          matches.push(result)
-        }
-      }
+  for candidate in candidates {
+    let selected = candidate.hit_indices().map(index => indexed_hits[index])
+    let result = correlation_make_match(
+      rule,
+      selected,
+      candidate.observed_count(),
+    )
+    let key = correlation_match_key(result)
+    if !seen_matches.contains(key) {
+      seen_matches[key] = true
+      matches.push(result)
     }
   }
   matches
