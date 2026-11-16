@@ -1,15 +1,17 @@
 ///|
 /// Response operations that can be described by a plan.
+#derive(Debug, Eq)
 pub(all) enum ResponseActionKind {
   IsolateHost
   TerminateProcess
   CollectArtifact
   BlockNetwork
   NotifyAnalyst
-} derive(Debug, Eq)
+}
 
 ///|
 /// Errors raised while constructing a response plan.
+#derive(Debug, Eq)
 pub(all) suberror ResponsePlanError {
   EmptyPlanId
   EmptyPlanName
@@ -18,16 +20,17 @@ pub(all) suberror ResponsePlanError {
   EmptyActionTarget
   EmptyActionReason
   DuplicateActionId
-} derive(Debug, Eq)
+}
 
 ///|
 /// One ordered response operation in a plan.
+#derive(Debug, Eq)
 pub struct ResponseAction {
   id : String
   kind : ResponseActionKind
   target : String
   reason : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a validated response operation without executing it.
@@ -80,11 +83,12 @@ pub fn ResponseAction::reason(self : ResponseAction) -> String {
 
 ///|
 /// An ordered, declarative response plan.
+#derive(Debug, Eq)
 pub struct ResponsePlan {
   id : String
   name : String
   actions : Array[ResponseAction]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a plan after validating its identity and action sequence.
@@ -132,19 +136,21 @@ pub fn ResponsePlan::actions(self : ResponsePlan) -> Array[ResponseAction] {
 
 ///|
 /// The outcome recorded for an operation in a dry-run report.
+#derive(Debug, Eq)
 pub(all) enum DryRunOutcome {
   WouldExecute
-} derive(Debug, Eq)
+}
 
 ///|
 /// One simulated response step.
+#derive(Debug, Eq)
 pub struct DryRunStep {
   action_id : String
   kind : ResponseActionKind
   target : String
   reason : String
   outcome : DryRunOutcome
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the simulated action identifier.
@@ -178,12 +184,13 @@ pub fn DryRunStep::outcome(self : DryRunStep) -> DryRunOutcome {
 
 ///|
 /// A deterministic simulation report for a response plan and alert.
+#derive(Debug, Eq)
 pub struct DryRunReport {
   plan_id : String
   alert_id : String
   host_id : HostId
   steps : Array[DryRunStep]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the plan represented by the report.

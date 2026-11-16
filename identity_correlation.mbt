@@ -1,11 +1,12 @@
 ///|
 /// Confidence describes identity evidence, not source authenticity.
+#derive(Debug, Eq)
 pub(all) enum IdentityEvidenceGrade {
   Verified
   Claimed
   Weak
   Indeterminate
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend IdentityEvidenceGrade with Eq::{equal, not_equal}

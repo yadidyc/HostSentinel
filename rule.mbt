@@ -1,5 +1,6 @@
 ///|
 /// Rule predicates supported by the first evaluation engine.
+#derive(Debug, Eq)
 pub(all) enum RuleCondition {
   EventKindIs(EventKind)
   HostPlatformIs(HostPlatform)
@@ -8,27 +9,29 @@ pub(all) enum RuleCondition {
   IocIs(Indicator)
   All(Array[RuleCondition])
   Any(Array[RuleCondition])
-} derive(Debug, Eq)
+}
 
 ///|
 /// Errors raised while constructing a detection rule.
+#derive(Debug, Eq)
 pub(all) suberror RuleError {
   EmptyRuleId
   EmptyRuleName
   EmptyDescription
   InvalidVersion
   EmptyConditionGroup
-} derive(Debug, Eq)
+}
 
 ///|
 /// Versioned metadata and predicate for one detection rule.
+#derive(Debug, Eq)
 pub struct Rule {
   id : String
   name : String
   description : String
   version : Int32
   condition : RuleCondition
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a validated versioned detection rule.
@@ -93,12 +96,13 @@ pub fn Rule::condition(self : Rule) -> RuleCondition {
 
 ///|
 /// Evidence produced when a rule matches one event.
+#derive(Debug, Eq)
 pub struct RuleHit {
   rule_id : String
   rule_version : Int32
   event_fingerprint : String
   evidence : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the matched rule identifier.

@@ -1,20 +1,22 @@
 ///|
 /// Risk level derived from a normalized numeric risk score.
+#derive(Debug, Eq)
 pub(all) enum RiskLevel {
   Informational
   Low
   Medium
   High
   Critical
-} derive(Debug, Eq)
+}
 
 ///|
 /// A bounded risk score and the strongest event severity used to calculate it.
+#derive(Debug, Eq)
 pub struct RiskScore {
   value : Int32
   level : RiskLevel
   max_severity : Severity
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the numeric score in the inclusive range 0 to 100.
@@ -81,6 +83,7 @@ fn risk_level(value : Int32) -> RiskLevel {
 
 ///|
 /// Lifecycle states supported by an alert.
+#derive(Debug, Eq)
 pub(all) enum AlertStatus {
   Open
   Acknowledged
@@ -90,18 +93,20 @@ pub(all) enum AlertStatus {
   Resolved
   Closed
   Suppressed
-} derive(Debug, Eq)
+}
 
 ///|
 /// Errors raised while creating or transitioning an alert.
+#derive(Debug, Eq)
 pub(all) suberror AlertError {
   EmptyAlertId
   InvalidTransition(from~ : AlertStatus, to~ : AlertStatus)
   StaleTimestamp
-} derive(Debug, Eq)
+}
 
 ///|
 /// A detection with a risk score and auditable lifecycle timestamps.
+#derive(Debug, Eq)
 pub struct Alert {
   id : String
   detection : Detection
@@ -109,7 +114,7 @@ pub struct Alert {
   status : AlertStatus
   created_at : ObservedAt
   updated_at : ObservedAt
-} derive(Debug, Eq)
+}
 
 ///|
 /// Opens a new alert for a detection.

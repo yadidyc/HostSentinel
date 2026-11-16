@@ -1,11 +1,12 @@
 ///|
 /// The supported Sigma correlation subset. Aggregation variants are rejected.
+#derive(Debug, Eq)
 pub(all) enum CorrelationRuleKind {
   EventCount
   ValueCount
   Temporal
   TemporalOrdered
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend CorrelationRuleKind with Eq::{equal, not_equal}
@@ -14,6 +15,7 @@ pub extend CorrelationRuleKind with Eq::{equal, not_equal}
 pub extend CorrelationRuleKind with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum CountOperator {
   Gt
   Gte
@@ -21,7 +23,7 @@ pub(all) enum CountOperator {
   Lte
   Eq
   Neq
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend CountOperator with Eq::{equal, not_equal}
@@ -30,11 +32,12 @@ pub extend CountOperator with Eq::{equal, not_equal}
 pub extend CountOperator with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum IdentityMissingPolicy {
   Reject
   Indeterminate
   Relaxed
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend IdentityMissingPolicy with Eq::{equal, not_equal}
@@ -43,11 +46,12 @@ pub extend IdentityMissingPolicy with Eq::{equal, not_equal}
 pub extend IdentityMissingPolicy with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum SourceConstraint {
   AnySource
   SameSource
   DifferentSources
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend SourceConstraint with Eq::{equal, not_equal}
@@ -69,9 +73,10 @@ pub(all) struct ScopedIdentityConstraint {
 
 ///|
 /// A rule-file error with a path into the input document.
+#derive(Debug, Eq)
 pub(all) suberror CorrelationRuleError {
   Invalid(path~ : String, detail~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend CorrelationRuleError with Eq::{equal, not_equal}

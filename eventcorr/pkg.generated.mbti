@@ -9,9 +9,10 @@ import {
 pub fn correlate(Rule, Array[Hit], max_candidates? : Int32) -> Array[Candidate] raise CorrelationError
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror CorrelationError {
   Invalid(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn CorrelationError::equal(Self, Self) -> Bool
 pub fn CorrelationError::not_equal(Self, Self) -> Bool
 pub fn CorrelationError::to_repr(Self) -> @debug.Repr
@@ -36,6 +37,7 @@ pub fn Candidate::roles(Self) -> Array[String]
 pub fn Candidate::sources(Self) -> Array[String]
 pub fn Candidate::started_ms(Self) -> Int64
 
+#derive(Eq, @debug.Debug)
 pub(all) enum CountOperator {
   Gt
   Gte
@@ -43,11 +45,12 @@ pub(all) enum CountOperator {
   Lte
   Eq
   Neq
-} derive(Eq, @debug.Debug)
+}
 pub fn CountOperator::equal(Self, Self) -> Bool
 pub fn CountOperator::not_equal(Self, Self) -> Bool
 pub fn CountOperator::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Hit {
   event_key : String
   role : String
@@ -55,21 +58,23 @@ pub(all) struct Hit {
   time_ms : Int64
   group_key : String
   value : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn Hit::equal(Self, Self) -> Bool
 pub fn Hit::not_equal(Self, Self) -> Bool
 pub fn Hit::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Kind {
   EventCount
   ValueCount
   Temporal
   TemporalOrdered
-} derive(Eq, @debug.Debug)
+}
 pub fn Kind::equal(Self, Self) -> Bool
 pub fn Kind::not_equal(Self, Self) -> Bool
 pub fn Kind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Rule {
   id : String
   kind : Kind
@@ -77,7 +82,7 @@ pub(all) struct Rule {
   window_ms : Int64
   operator : CountOperator?
   threshold : Int32?
-} derive(Eq, @debug.Debug)
+}
 pub fn Rule::equal(Self, Self) -> Bool
 pub fn Rule::not_equal(Self, Self) -> Bool
 pub fn Rule::to_repr(Self) -> @debug.Repr

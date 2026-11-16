@@ -1,21 +1,23 @@
 ///|
 /// Errors raised while constructing an event correlation pattern.
+#derive(Debug, Eq)
 pub(all) suberror CorrelationError {
   EmptyPatternId
   EmptyPatternName
   EmptyRuleSequence
   EmptyRuleId
   InvalidWindow
-} derive(Debug, Eq)
+}
 
 ///|
 /// A sequence of rule hits that must occur on one host within a time window.
+#derive(Debug, Eq)
 pub struct CorrelationPattern {
   id : String
   name : String
   rule_ids : Array[String]
   window_seconds : Int64
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a validated event correlation pattern.
@@ -77,10 +79,11 @@ pub fn CorrelationPattern::window_seconds(self : CorrelationPattern) -> Int64 {
 
 ///|
 /// An event together with the rules that matched it.
+#derive(Debug, Eq)
 pub struct EventObservation {
   event : NormalizedEvent
   hits : Array[RuleHit]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates an observation for correlation.
@@ -105,6 +108,7 @@ pub fn EventObservation::hits(self : EventObservation) -> Array[RuleHit] {
 
 ///|
 /// A correlated detection assembled from an ordered rule sequence.
+#derive(Debug, Eq)
 pub struct Detection {
   pattern_id : String
   host_id : HostId
@@ -113,7 +117,7 @@ pub struct Detection {
   started_at : ObservedAt
   ended_at : ObservedAt
   dedup_key : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the pattern that produced the detection.
@@ -164,13 +168,13 @@ pub fn correlate(
   observations : Array[EventObservation],
 ) -> Array[Detection] {
   let detections : Array[Detection] = []
-  let seen : Array[String] = []
+  let seen : Map[String, Bool] = Map([])
   for start_index, _ in observations {
     match find_detection(pattern, observations, start_index) {
       Some(detection) => {
         let key = detection.dedup_key()
         if !seen.contains(key) {
-          seen.push(key)
+          seen[key] = true
           detections.push(detection)
         }
       }

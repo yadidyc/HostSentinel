@@ -47,26 +47,29 @@ pub fn score_detection(Detection, Array[EventObservation]) -> RiskScore
 pub fn version() -> String
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror AdapterError {
   InvalidJson(record_number~ : Int32, raw~ : String)
   ExpectedObject(record_number~ : Int32)
   MissingField(record_number~ : Int32, path~ : String)
   InvalidField(record_number~ : Int32, path~ : String, detail~ : String)
   Unsupported(record_number~ : Int32, path~ : String, value~ : String)
-} derive(Eq, @debug.Debug)
+}
 pub fn AdapterError::equal(Self, Self) -> Bool
 pub fn AdapterError::not_equal(Self, Self) -> Bool
 pub fn AdapterError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror AlertError {
   EmptyAlertId
   InvalidTransition(from~ : AlertStatus, to~ : AlertStatus)
   StaleTimestamp
-} derive(Eq, @debug.Debug)
+}
 pub fn AlertError::equal(Self, Self) -> Bool
 pub fn AlertError::not_equal(Self, Self) -> Bool
 pub fn AlertError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror CaseError {
   EmptyCaseId
   EmptyEvidenceId
@@ -78,64 +81,71 @@ pub(all) suberror CaseError {
   InvalidSequence
   DuplicateEvidenceId
   StaleTimestamp
-} derive(Eq, @debug.Debug)
+}
 pub fn CaseError::equal(Self, Self) -> Bool
 pub fn CaseError::not_equal(Self, Self) -> Bool
 pub fn CaseError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror CorrelationError {
   EmptyPatternId
   EmptyPatternName
   EmptyRuleSequence
   EmptyRuleId
   InvalidWindow
-} derive(Eq, @debug.Debug)
+}
 pub fn CorrelationError::equal(Self, Self) -> Bool
 pub fn CorrelationError::not_equal(Self, Self) -> Bool
 pub fn CorrelationError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror CorrelationRuleError {
   Invalid(path~ : String, detail~ : String)
-} derive(Eq, @debug.Debug)
+}
 pub fn CorrelationRuleError::equal(Self, Self) -> Bool
 pub fn CorrelationRuleError::not_equal(Self, Self) -> Bool
 pub fn CorrelationRuleError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror DomainError {
   EmptyHostId
   EmptyEventId
   EmptyHostname
   InvalidTimestamp
-} derive(Eq, @debug.Debug)
+}
 pub fn DomainError::equal(Self, Self) -> Bool
 pub fn DomainError::not_equal(Self, Self) -> Bool
 pub fn DomainError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror HostEventError {
   EmptyIdentity
-} derive(Eq, @debug.Debug)
+}
 pub fn HostEventError::equal(Self, Self) -> Bool
 pub fn HostEventError::not_equal(Self, Self) -> Bool
 pub fn HostEventError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror IocError {
   EmptyValue(kind~ : IocKind)
   InvalidFileHash(value~ : String)
-} derive(Eq, @debug.Debug)
+}
 pub fn IocError::equal(Self, Self) -> Bool
 pub fn IocError::not_equal(Self, Self) -> Bool
 pub fn IocError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror NormalizationError {
   InvalidJson(line_number~ : Int32, line~ : String)
   ExpectedObject(line_number~ : Int32, line~ : String)
   MissingField(line_number~ : Int32, field~ : String)
   InvalidField(line_number~ : Int32, field~ : String, value~ : String)
-} derive(Eq, @debug.Debug)
+}
 pub fn NormalizationError::equal(Self, Self) -> Bool
 pub fn NormalizationError::not_equal(Self, Self) -> Bool
 pub fn NormalizationError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror ResponsePlanError {
   EmptyPlanId
   EmptyPlanName
@@ -144,23 +154,25 @@ pub(all) suberror ResponsePlanError {
   EmptyActionTarget
   EmptyActionReason
   DuplicateActionId
-} derive(Eq, @debug.Debug)
+}
 pub fn ResponsePlanError::equal(Self, Self) -> Bool
 pub fn ResponsePlanError::not_equal(Self, Self) -> Bool
 pub fn ResponsePlanError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror RuleError {
   EmptyRuleId
   EmptyRuleName
   EmptyDescription
   InvalidVersion
   EmptyConditionGroup
-} derive(Eq, @debug.Debug)
+}
 pub fn RuleError::equal(Self, Self) -> Bool
 pub fn RuleError::not_equal(Self, Self) -> Bool
 pub fn RuleError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub struct Alert {
   id : String
   detection : Detection
@@ -168,7 +180,7 @@ pub struct Alert {
   status : AlertStatus
   created_at : ObservedAt
   updated_at : ObservedAt
-} derive(Eq, @debug.Debug)
+}
 pub fn Alert::created_at(Self) -> ObservedAt
 pub fn Alert::detection(Self) -> Detection
 pub fn Alert::equal(Self, Self) -> Bool
@@ -181,6 +193,7 @@ pub fn Alert::to_repr(Self) -> @debug.Repr
 pub fn Alert::transition(Self, status~ : AlertStatus, at~ : ObservedAt) -> Self raise AlertError
 pub fn Alert::updated_at(Self) -> ObservedAt
 
+#derive(Eq, @debug.Debug)
 pub(all) enum AlertStatus {
   Open
   Acknowledged
@@ -190,18 +203,19 @@ pub(all) enum AlertStatus {
   Resolved
   Closed
   Suppressed
-} derive(Eq, @debug.Debug)
+}
 pub fn AlertStatus::equal(Self, Self) -> Bool
 pub fn AlertStatus::not_equal(Self, Self) -> Bool
 pub fn AlertStatus::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct AuditEntry {
   sequence : Int32
   actor : String
   action : String
   details : String
   occurred_at : ObservedAt
-} derive(Eq, @debug.Debug)
+}
 pub fn AuditEntry::action(Self) -> String
 pub fn AuditEntry::actor(Self) -> String
 pub fn AuditEntry::details(Self) -> String
@@ -223,12 +237,13 @@ pub(all) struct BaseFieldPredicate {
   value : String
 }
 
+#derive(Eq, @debug.Debug)
 pub struct Case {
   id : String
   alert : Alert
   evidence : Array[Evidence]
   audit_trail : Array[AuditEntry]
-} derive(Eq, @debug.Debug)
+}
 pub fn Case::add_evidence(Self, evidence~ : Evidence, actor~ : String) -> Self raise CaseError
 pub fn Case::alert(Self) -> Alert
 pub fn Case::audit_trail(Self) -> Array[AuditEntry]
@@ -271,12 +286,13 @@ pub(all) struct CorrelationKeyEvidence {
   status : IdentityStatus
 }
 
+#derive(Eq, @debug.Debug)
 pub struct CorrelationPattern {
   id : String
   name : String
   rule_ids : Array[String]
   window_seconds : Int64
-} derive(Eq, @debug.Debug)
+}
 pub fn CorrelationPattern::equal(Self, Self) -> Bool
 pub fn CorrelationPattern::id(Self) -> String
 pub fn CorrelationPattern::name(Self) -> String
@@ -286,16 +302,18 @@ pub fn CorrelationPattern::rule_ids(Self) -> Array[String]
 pub fn CorrelationPattern::to_repr(Self) -> @debug.Repr
 pub fn CorrelationPattern::window_seconds(Self) -> Int64
 
+#derive(Eq, @debug.Debug)
 pub(all) enum CorrelationRuleKind {
   EventCount
   ValueCount
   Temporal
   TemporalOrdered
-} derive(Eq, @debug.Debug)
+}
 pub fn CorrelationRuleKind::equal(Self, Self) -> Bool
 pub fn CorrelationRuleKind::not_equal(Self, Self) -> Bool
 pub fn CorrelationRuleKind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum CountOperator {
   Gt
   Gte
@@ -303,11 +321,12 @@ pub(all) enum CountOperator {
   Lte
   Eq
   Neq
-} derive(Eq, @debug.Debug)
+}
 pub fn CountOperator::equal(Self, Self) -> Bool
 pub fn CountOperator::not_equal(Self, Self) -> Bool
 pub fn CountOperator::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Detection {
   pattern_id : String
   host_id : HostId
@@ -316,7 +335,7 @@ pub struct Detection {
   started_at : ObservedAt
   ended_at : ObservedAt
   dedup_key : String
-} derive(Eq, @debug.Debug)
+}
 pub fn Detection::dedup_key(Self) -> String
 pub fn Detection::ended_at(Self) -> ObservedAt
 pub fn Detection::equal(Self, Self) -> Bool
@@ -328,19 +347,21 @@ pub fn Detection::rule_ids(Self) -> Array[String]
 pub fn Detection::started_at(Self) -> ObservedAt
 pub fn Detection::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum DryRunOutcome {
   WouldExecute
-} derive(Eq, @debug.Debug)
+}
 pub fn DryRunOutcome::equal(Self, Self) -> Bool
 pub fn DryRunOutcome::not_equal(Self, Self) -> Bool
 pub fn DryRunOutcome::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct DryRunReport {
   plan_id : String
   alert_id : String
   host_id : HostId
   steps : Array[DryRunStep]
-} derive(Eq, @debug.Debug)
+}
 pub fn DryRunReport::alert_id(Self) -> String
 pub fn DryRunReport::equal(Self, Self) -> Bool
 pub fn DryRunReport::host_id(Self) -> HostId
@@ -349,13 +370,14 @@ pub fn DryRunReport::plan_id(Self) -> String
 pub fn DryRunReport::steps(Self) -> Array[DryRunStep]
 pub fn DryRunReport::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct DryRunStep {
   action_id : String
   kind : ResponseActionKind
   target : String
   reason : String
   outcome : DryRunOutcome
-} derive(Eq, @debug.Debug)
+}
 pub fn DryRunStep::action_id(Self) -> String
 pub fn DryRunStep::equal(Self, Self) -> Bool
 pub fn DryRunStep::kind(Self) -> ResponseActionKind
@@ -365,30 +387,33 @@ pub fn DryRunStep::reason(Self) -> String
 pub fn DryRunStep::target(Self) -> String
 pub fn DryRunStep::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct EventId {
   value : String
-} derive(Eq, @debug.Debug)
+}
 pub fn EventId::as_string(Self) -> String
 pub fn EventId::equal(Self, Self) -> Bool
 pub fn EventId::new(value~ : String) -> Self raise DomainError
 pub fn EventId::not_equal(Self, Self) -> Bool
 pub fn EventId::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum EventKind {
   Process
   File
   Network
   Authentication
   Persistence
-} derive(Eq, @debug.Debug)
+}
 pub fn EventKind::equal(Self, Self) -> Bool
 pub fn EventKind::not_equal(Self, Self) -> Bool
 pub fn EventKind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct EventObservation {
   event : NormalizedEvent
   hits : Array[RuleHit]
-} derive(Eq, @debug.Debug)
+}
 pub fn EventObservation::equal(Self, Self) -> Bool
 pub fn EventObservation::event(Self) -> NormalizedEvent
 pub fn EventObservation::hits(Self) -> Array[RuleHit]
@@ -396,6 +421,7 @@ pub fn EventObservation::new(event~ : NormalizedEvent, hits~ : Array[RuleHit]) -
 pub fn EventObservation::not_equal(Self, Self) -> Bool
 pub fn EventObservation::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum EventSource {
   Agent
   Sysmon
@@ -403,19 +429,21 @@ pub(all) enum EventSource {
   WindowsEvent
   Manual
   Other(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn EventSource::equal(Self, Self) -> Bool
 pub fn EventSource::not_equal(Self, Self) -> Bool
 pub fn EventSource::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct EventTime {
   value : Int64
   precision : TimePrecision
-} derive(Eq, @debug.Debug)
+}
 pub fn EventTime::equal(Self, Self) -> Bool
 pub fn EventTime::not_equal(Self, Self) -> Bool
 pub fn EventTime::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Evidence {
   id : String
   kind : EvidenceKind
@@ -423,7 +451,7 @@ pub struct Evidence {
   source : String
   reference : String
   collected_at : ObservedAt
-} derive(Eq, @debug.Debug)
+}
 pub fn Evidence::collected_at(Self) -> ObservedAt
 pub fn Evidence::equal(Self, Self) -> Bool
 pub fn Evidence::id(Self) -> String
@@ -435,13 +463,14 @@ pub fn Evidence::source(Self) -> String
 pub fn Evidence::summary(Self) -> String
 pub fn Evidence::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum EvidenceKind {
   Event
   RuleHit
   IocMatch
   AnalystNote
   Artifact
-} derive(Eq, @debug.Debug)
+}
 pub fn EvidenceKind::equal(Self, Self) -> Bool
 pub fn EvidenceKind::not_equal(Self, Self) -> Bool
 pub fn EvidenceKind::to_repr(Self) -> @debug.Repr
@@ -451,12 +480,13 @@ pub(all) struct FieldAlias {
   mappings : Map[String, String]
 }
 
+#derive(Eq, @debug.Debug)
 pub struct Host {
   id : HostId
   hostname : String
   platform : HostPlatform
   state : HostState
-} derive(Eq, @debug.Debug)
+}
 pub fn Host::equal(Self, Self) -> Bool
 pub fn Host::hostname(Self) -> String
 pub fn Host::id(Self) -> HostId
@@ -466,6 +496,7 @@ pub fn Host::platform(Self) -> HostPlatform
 pub fn Host::state(Self) -> HostState
 pub fn Host::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HostEvent {
   id : EventId
   source : EventSource
@@ -479,20 +510,22 @@ pub(all) struct HostEvent {
   network : NetworkAttributes
   original : OriginalEventReference
   diagnostics : Array[MappingDiagnostic]
-} derive(Eq, @debug.Debug)
+}
 pub fn HostEvent::equal(Self, Self) -> Bool
 pub fn HostEvent::not_equal(Self, Self) -> Bool
 pub fn HostEvent::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct HostId {
   value : String
-} derive(Eq, @debug.Debug)
+}
 pub fn HostId::as_string(Self) -> String
 pub fn HostId::equal(Self, Self) -> Bool
 pub fn HostId::new(value~ : String) -> Self raise DomainError
 pub fn HostId::not_equal(Self, Self) -> Bool
 pub fn HostId::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct HostIdentities {
   host : Identity
   boot : Identity
@@ -500,35 +533,38 @@ pub(all) struct HostIdentities {
   session : Identity
   process : Identity
   parent_process : Identity
-} derive(Eq, @debug.Debug)
+}
 pub fn HostIdentities::equal(Self, Self) -> Bool
 pub fn HostIdentities::missing() -> Self
 pub fn HostIdentities::not_equal(Self, Self) -> Bool
 pub fn HostIdentities::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HostPlatform {
   Windows
   Linux
   MacOS
   Other(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn HostPlatform::equal(Self, Self) -> Bool
 pub fn HostPlatform::not_equal(Self, Self) -> Bool
 pub fn HostPlatform::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum HostState {
   Active
   Isolated
   Retired
-} derive(Eq, @debug.Debug)
+}
 pub fn HostState::equal(Self, Self) -> Bool
 pub fn HostState::not_equal(Self, Self) -> Bool
 pub fn HostState::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Identity {
   status : IdentityStatus
   value : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn Identity::equal(Self, Self) -> Bool
 pub fn Identity::missing() -> Self
 pub fn Identity::not_equal(Self, Self) -> Bool
@@ -586,39 +622,43 @@ pub fn IdentityCorrelationResult::sources(Self) -> Array[String]
 pub fn IdentityCorrelationResult::span_ms(Self) -> Int64
 pub fn IdentityCorrelationResult::window_ms(Self) -> Int64
 
+#derive(Eq, @debug.Debug)
 pub(all) enum IdentityEvidenceGrade {
   Verified
   Claimed
   Weak
   Indeterminate
-} derive(Eq, @debug.Debug)
+}
 pub fn IdentityEvidenceGrade::equal(Self, Self) -> Bool
 pub fn IdentityEvidenceGrade::not_equal(Self, Self) -> Bool
 pub fn IdentityEvidenceGrade::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum IdentityMissingPolicy {
   Reject
   Indeterminate
   Relaxed
-} derive(Eq, @debug.Debug)
+}
 pub fn IdentityMissingPolicy::equal(Self, Self) -> Bool
 pub fn IdentityMissingPolicy::not_equal(Self, Self) -> Bool
 pub fn IdentityMissingPolicy::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum IdentityStatus {
   Missing
   Unknown
   Unverified
   Verified
-} derive(Eq, @debug.Debug)
+}
 pub fn IdentityStatus::equal(Self, Self) -> Bool
 pub fn IdentityStatus::not_equal(Self, Self) -> Bool
 pub fn IdentityStatus::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Indicator {
   kind : IocKind
   value : String
-} derive(Eq, @debug.Debug)
+}
 pub fn Indicator::equal(Self, Self) -> Bool
 pub fn Indicator::kind(Self) -> IocKind
 pub fn Indicator::matches(Self, String) -> Bool
@@ -627,6 +667,7 @@ pub fn Indicator::not_equal(Self, Self) -> Bool
 pub fn Indicator::to_repr(Self) -> @debug.Repr
 pub fn Indicator::value(Self) -> String
 
+#derive(Eq, @debug.Debug)
 pub(all) enum IocKind {
   IpAddress
   Domain
@@ -634,15 +675,16 @@ pub(all) enum IocKind {
   FileHash
   FilePath
   ProcessName
-} derive(Eq, @debug.Debug)
+}
 pub fn IocKind::equal(Self, Self) -> Bool
 pub fn IocKind::not_equal(Self, Self) -> Bool
 pub fn IocKind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct IocMatch {
   indicator : Indicator
   candidate : String
-} derive(Eq, @debug.Debug)
+}
 pub fn IocMatch::candidate(Self) -> String
 pub fn IocMatch::equal(Self, Self) -> Bool
 pub fn IocMatch::indicator(Self) -> Indicator
@@ -665,44 +707,48 @@ pub(all) enum LeadRejectionReason {
   InsufficientSignal
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) struct MappingDiagnostic {
   path : String
   issue : MappingIssue
   detail : String
-} derive(Eq, @debug.Debug)
+}
 pub fn MappingDiagnostic::equal(Self, Self) -> Bool
 pub fn MappingDiagnostic::not_equal(Self, Self) -> Bool
 pub fn MappingDiagnostic::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum MappingIssue {
   Missing
   Invalid
   Lossy
   Unverified
-} derive(Eq, @debug.Debug)
+}
 pub fn MappingIssue::equal(Self, Self) -> Bool
 pub fn MappingIssue::not_equal(Self, Self) -> Bool
 pub fn MappingIssue::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct NetworkAttributes {
   src_ip : String?
   src_port : Int32?
   dst_ip : String?
   dst_port : Int32?
   protocol : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn NetworkAttributes::empty() -> Self
 pub fn NetworkAttributes::equal(Self, Self) -> Bool
 pub fn NetworkAttributes::not_equal(Self, Self) -> Bool
 pub fn NetworkAttributes::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct NormalizedEvent {
   line_number : Int32
   raw_line : String
   host : Host
   event : SecurityEvent
   fingerprint : String
-} derive(Eq, @debug.Debug)
+}
 pub fn NormalizedEvent::equal(Self, Self) -> Bool
 pub fn NormalizedEvent::event(Self) -> SecurityEvent
 pub fn NormalizedEvent::fingerprint(Self) -> String
@@ -712,32 +758,35 @@ pub fn NormalizedEvent::not_equal(Self, Self) -> Bool
 pub fn NormalizedEvent::raw_line(Self) -> String
 pub fn NormalizedEvent::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct ObservedAt {
   unix_seconds : Int64
-} derive(Eq, @debug.Debug)
+}
 pub fn ObservedAt::equal(Self, Self) -> Bool
 pub fn ObservedAt::from_unix_seconds(unix_seconds~ : Int64) -> Self raise DomainError
 pub fn ObservedAt::not_equal(Self, Self) -> Bool
 pub fn ObservedAt::to_repr(Self) -> @debug.Repr
 pub fn ObservedAt::unix_seconds(Self) -> Int64
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OcsfClassification {
   category_uid : Int32
   class_uid : Int32
   activity_id : Int32
   type_uid : Int32
   severity_id : Int32
-} derive(Eq, @debug.Debug)
+}
 pub fn OcsfClassification::equal(Self, Self) -> Bool
 pub fn OcsfClassification::not_equal(Self, Self) -> Bool
 pub fn OcsfClassification::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct OriginalEventReference {
   format : String
   record_number : Int32
   record_id : String?
   raw : String
-} derive(Eq, @debug.Debug)
+}
 pub fn OriginalEventReference::equal(Self, Self) -> Bool
 pub fn OriginalEventReference::not_equal(Self, Self) -> Bool
 pub fn OriginalEventReference::to_repr(Self) -> @debug.Repr
@@ -747,12 +796,13 @@ pub(all) struct ParentChildLink {
   child : String
 }
 
+#derive(Eq, @debug.Debug)
 pub struct ResponseAction {
   id : String
   kind : ResponseActionKind
   target : String
   reason : String
-} derive(Eq, @debug.Debug)
+}
 pub fn ResponseAction::equal(Self, Self) -> Bool
 pub fn ResponseAction::id(Self) -> String
 pub fn ResponseAction::kind(Self) -> ResponseActionKind
@@ -762,22 +812,24 @@ pub fn ResponseAction::reason(Self) -> String
 pub fn ResponseAction::target(Self) -> String
 pub fn ResponseAction::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum ResponseActionKind {
   IsolateHost
   TerminateProcess
   CollectArtifact
   BlockNetwork
   NotifyAnalyst
-} derive(Eq, @debug.Debug)
+}
 pub fn ResponseActionKind::equal(Self, Self) -> Bool
 pub fn ResponseActionKind::not_equal(Self, Self) -> Bool
 pub fn ResponseActionKind::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct ResponsePlan {
   id : String
   name : String
   actions : Array[ResponseAction]
-} derive(Eq, @debug.Debug)
+}
 pub fn ResponsePlan::actions(Self) -> Array[ResponseAction]
 pub fn ResponsePlan::equal(Self, Self) -> Bool
 pub fn ResponsePlan::id(Self) -> String
@@ -786,22 +838,24 @@ pub fn ResponsePlan::new(id~ : String, name~ : String, actions~ : Array[Response
 pub fn ResponsePlan::not_equal(Self, Self) -> Bool
 pub fn ResponsePlan::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RiskLevel {
   Informational
   Low
   Medium
   High
   Critical
-} derive(Eq, @debug.Debug)
+}
 pub fn RiskLevel::equal(Self, Self) -> Bool
 pub fn RiskLevel::not_equal(Self, Self) -> Bool
 pub fn RiskLevel::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct RiskScore {
   value : Int32
   level : RiskLevel
   max_severity : Severity
-} derive(Eq, @debug.Debug)
+}
 pub fn RiskScore::equal(Self, Self) -> Bool
 pub fn RiskScore::level(Self) -> RiskLevel
 pub fn RiskScore::max_severity(Self) -> Severity
@@ -809,13 +863,14 @@ pub fn RiskScore::not_equal(Self, Self) -> Bool
 pub fn RiskScore::to_repr(Self) -> @debug.Repr
 pub fn RiskScore::value(Self) -> Int32
 
+#derive(Eq, @debug.Debug)
 pub struct Rule {
   id : String
   name : String
   description : String
   version : Int32
   condition : RuleCondition
-} derive(Eq, @debug.Debug)
+}
 pub fn Rule::condition(Self) -> RuleCondition
 pub fn Rule::description(Self) -> String
 pub fn Rule::equal(Self, Self) -> Bool
@@ -826,6 +881,7 @@ pub fn Rule::not_equal(Self, Self) -> Bool
 pub fn Rule::to_repr(Self) -> @debug.Repr
 pub fn Rule::version(Self) -> Int32
 
+#derive(Eq, @debug.Debug)
 pub(all) enum RuleCondition {
   EventKindIs(EventKind)
   HostPlatformIs(HostPlatform)
@@ -834,17 +890,18 @@ pub(all) enum RuleCondition {
   IocIs(Indicator)
   All(Array[RuleCondition])
   Any(Array[RuleCondition])
-} derive(Eq, @debug.Debug)
+}
 pub fn RuleCondition::equal(Self, Self) -> Bool
 pub fn RuleCondition::not_equal(Self, Self) -> Bool
 pub fn RuleCondition::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct RuleHit {
   rule_id : String
   rule_version : Int32
   event_fingerprint : String
   evidence : Array[String]
-} derive(Eq, @debug.Debug)
+}
 pub fn RuleHit::equal(Self, Self) -> Bool
 pub fn RuleHit::event_fingerprint(Self) -> String
 pub fn RuleHit::evidence(Self) -> Array[String]
@@ -858,6 +915,7 @@ pub(all) struct ScopedIdentityConstraint {
   rules : Array[String]
 }
 
+#derive(Eq, @debug.Debug)
 pub struct SecurityEvent {
   id : EventId
   host_id : HostId
@@ -865,7 +923,7 @@ pub struct SecurityEvent {
   source : EventSource
   severity : Severity
   observed_at : ObservedAt
-} derive(Eq, @debug.Debug)
+}
 pub fn SecurityEvent::equal(Self, Self) -> Bool
 pub fn SecurityEvent::host_id(Self) -> HostId
 pub fn SecurityEvent::id(Self) -> EventId
@@ -897,13 +955,14 @@ pub struct SessionLeadReport {
 pub fn SessionLeadReport::leads(Self) -> Array[SessionLead]
 pub fn SessionLeadReport::rejections(Self) -> Array[LeadRejection]
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Severity {
   Informational
   Low
   Medium
   High
   Critical
-} derive(Eq, @debug.Debug)
+}
 pub fn Severity::equal(Self, Self) -> Bool
 pub fn Severity::not_equal(Self, Self) -> Bool
 pub fn Severity::to_repr(Self) -> @debug.Repr
@@ -932,19 +991,21 @@ pub fn SigmaCorrelationMatch::rule_version(Self) -> Int32
 pub fn SigmaCorrelationMatch::sources(Self) -> Array[String]
 pub fn SigmaCorrelationMatch::started_ms(Self) -> Int64
 
+#derive(Eq, @debug.Debug)
 pub(all) enum SourceConstraint {
   AnySource
   SameSource
   DifferentSources
-} derive(Eq, @debug.Debug)
+}
 pub fn SourceConstraint::equal(Self, Self) -> Bool
 pub fn SourceConstraint::not_equal(Self, Self) -> Bool
 pub fn SourceConstraint::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum TimePrecision {
   Seconds
   Milliseconds
-} derive(Eq, @debug.Debug)
+}
 pub fn TimePrecision::equal(Self, Self) -> Bool
 pub fn TimePrecision::not_equal(Self, Self) -> Bool
 pub fn TimePrecision::to_repr(Self) -> @debug.Repr

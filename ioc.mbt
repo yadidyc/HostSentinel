@@ -1,5 +1,6 @@
 ///|
 /// The supported indicator-of-compromise categories.
+#derive(Debug, Eq)
 pub(all) enum IocKind {
   IpAddress
   Domain
@@ -7,21 +8,23 @@ pub(all) enum IocKind {
   FileHash
   FilePath
   ProcessName
-} derive(Debug, Eq)
+}
 
 ///|
 /// Errors raised while constructing an IOC indicator.
+#derive(Debug, Eq)
 pub(all) suberror IocError {
   EmptyValue(kind~ : IocKind)
   InvalidFileHash(value~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A normalized indicator of compromise.
+#derive(Debug, Eq)
 pub struct Indicator {
   kind : IocKind
   value : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates an indicator after applying its category-specific normalization.
@@ -60,10 +63,11 @@ pub fn Indicator::matches(self : Indicator, candidate : String) -> Bool {
 
 ///|
 /// A successful IOC match with the original candidate value retained.
+#derive(Debug, Eq)
 pub struct IocMatch {
   indicator : Indicator
   candidate : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the matched indicator.

@@ -1,17 +1,19 @@
 ///|
 /// Errors raised while constructing host security domain values.
+#derive(Debug, Eq)
 pub(all) suberror DomainError {
   EmptyHostId
   EmptyEventId
   EmptyHostname
   InvalidTimestamp
-} derive(Debug, Eq)
+}
 
 ///|
 /// A stable identifier for a managed host.
+#derive(Debug, Eq)
 pub struct HostId {
   value : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a non-empty host identifier.
@@ -30,29 +32,32 @@ pub fn HostId::as_string(self : HostId) -> String {
 
 ///|
 /// Operating system family associated with a host.
+#derive(Debug, Eq)
 pub(all) enum HostPlatform {
   Windows
   Linux
   MacOS
   Other(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Lifecycle state tracked for a host.
+#derive(Debug, Eq)
 pub(all) enum HostState {
   Active
   Isolated
   Retired
-} derive(Debug, Eq)
+}
 
 ///|
 /// A host known to the platform.
+#derive(Debug, Eq)
 pub struct Host {
   id : HostId
   hostname : String
   platform : HostPlatform
   state : HostState
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates an active host with a non-empty hostname.
@@ -93,9 +98,10 @@ pub fn Host::state(self : Host) -> HostState {
 
 ///|
 /// A stable identifier for one observed security event.
+#derive(Debug, Eq)
 pub struct EventId {
   value : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a non-empty event identifier.
@@ -114,9 +120,10 @@ pub fn EventId::as_string(self : EventId) -> String {
 
 ///|
 /// A timestamp represented as Unix seconds.
+#derive(Debug, Eq)
 pub struct ObservedAt {
   unix_seconds : Int64
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a timestamp at or after the Unix epoch.
@@ -137,16 +144,18 @@ pub fn ObservedAt::unix_seconds(self : ObservedAt) -> Int64 {
 
 ///|
 /// Broad category of a security event.
+#derive(Debug, Eq)
 pub(all) enum EventKind {
   Process
   File
   Network
   Authentication
   Persistence
-} derive(Debug, Eq)
+}
 
 ///|
 /// Source that produced a security event.
+#derive(Debug, Eq)
 pub(all) enum EventSource {
   Agent
   Sysmon
@@ -154,20 +163,22 @@ pub(all) enum EventSource {
   WindowsEvent
   Manual
   Other(String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// Severity assigned before detection and correlation enrichments.
+#derive(Debug, Eq)
 pub(all) enum Severity {
   Informational
   Low
   Medium
   High
   Critical
-} derive(Debug, Eq)
+}
 
 ///|
 /// A normalized security event associated with a host.
+#derive(Debug, Eq)
 pub struct SecurityEvent {
   id : EventId
   host_id : HostId
@@ -175,7 +186,7 @@ pub struct SecurityEvent {
   source : EventSource
   severity : Severity
   observed_at : ObservedAt
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a normalized security event from validated domain values.

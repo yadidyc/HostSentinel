@@ -1,12 +1,13 @@
 ///|
 /// Diagnostics for schema-aware input adapters; paths refer to the raw input.
+#derive(Debug, Eq)
 pub(all) suberror AdapterError {
   InvalidJson(record_number~ : Int32, raw~ : String)
   ExpectedObject(record_number~ : Int32)
   MissingField(record_number~ : Int32, path~ : String)
   InvalidField(record_number~ : Int32, path~ : String, detail~ : String)
   Unsupported(record_number~ : Int32, path~ : String, value~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend AdapterError with Eq::{equal, not_equal}

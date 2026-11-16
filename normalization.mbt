@@ -1,21 +1,23 @@
 ///|
 /// Errors raised while converting one JSONL record into the domain model.
+#derive(Debug, Eq)
 pub(all) suberror NormalizationError {
   InvalidJson(line_number~ : Int32, line~ : String)
   ExpectedObject(line_number~ : Int32, line~ : String)
   MissingField(line_number~ : Int32, field~ : String)
   InvalidField(line_number~ : Int32, field~ : String, value~ : String)
-} derive(Debug, Eq)
+}
 
 ///|
 /// A normalized event together with its host, source line, and deduplication key.
+#derive(Debug, Eq)
 pub struct NormalizedEvent {
   line_number : Int32
   raw_line : String
   host : Host
   event : SecurityEvent
   fingerprint : String
-} derive(Debug, Eq)
+}
 
 ///|
 /// Returns the physical JSONL line number.

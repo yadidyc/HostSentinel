@@ -1,11 +1,12 @@
 ///|
 /// Whether an identity was absent, explicitly unknown, source-claimed, or verified.
+#derive(Debug, Eq)
 pub(all) enum IdentityStatus {
   Missing
   Unknown
   Unverified
   Verified
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend IdentityStatus with Eq::{equal, not_equal}
@@ -15,10 +16,11 @@ pub extend IdentityStatus with @debug.Debug::{to_repr}
 
 ///|
 /// An identity value whose trust state cannot be confused with an empty string.
+#derive(Debug, Eq)
 pub struct Identity {
   status : IdentityStatus
   value : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Identity with Eq::{equal, not_equal}
@@ -27,9 +29,10 @@ pub extend Identity with Eq::{equal, not_equal}
 pub extend Identity with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) suberror HostEventError {
   EmptyIdentity
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend HostEventError with Eq::{equal, not_equal}
@@ -77,10 +80,11 @@ pub fn Identity::value(self : Identity) -> String? {
 
 ///|
 /// Units are explicit: legacy JSONL uses seconds; OCSF uses milliseconds.
+#derive(Debug, Eq)
 pub(all) enum TimePrecision {
   Seconds
   Milliseconds
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend TimePrecision with Eq::{equal, not_equal}
@@ -89,10 +93,11 @@ pub extend TimePrecision with Eq::{equal, not_equal}
 pub extend TimePrecision with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct EventTime {
   value : Int64
   precision : TimePrecision
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend EventTime with Eq::{equal, not_equal}
@@ -102,6 +107,7 @@ pub extend EventTime with @debug.Debug::{to_repr}
 
 ///|
 /// Host, boot, user, session, process instance, and parent process identities.
+#derive(Debug, Eq)
 pub(all) struct HostIdentities {
   host : Identity
   boot : Identity
@@ -109,7 +115,7 @@ pub(all) struct HostIdentities {
   session : Identity
   process : Identity
   parent_process : Identity
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend HostIdentities with Eq::{equal, not_equal}
@@ -131,13 +137,14 @@ pub fn HostIdentities::missing() -> HostIdentities {
 
 ///|
 /// Only explicitly present connection attributes are populated.
+#derive(Debug, Eq)
 pub(all) struct NetworkAttributes {
   src_ip : String?
   src_port : Int32?
   dst_ip : String?
   dst_port : Int32?
   protocol : String?
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend NetworkAttributes with Eq::{equal, not_equal}
@@ -158,12 +165,13 @@ pub fn NetworkAttributes::empty() -> NetworkAttributes {
 
 ///|
 /// A pointer to the input record; raw text remains available for evidence.
+#derive(Debug, Eq)
 pub(all) struct OriginalEventReference {
   format : String
   record_number : Int32
   record_id : String?
   raw : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend OriginalEventReference with Eq::{equal, not_equal}
@@ -172,12 +180,13 @@ pub extend OriginalEventReference with Eq::{equal, not_equal}
 pub extend OriginalEventReference with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum MappingIssue {
   Missing
   Invalid
   Lossy
   Unverified
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend MappingIssue with Eq::{equal, not_equal}
@@ -186,11 +195,12 @@ pub extend MappingIssue with Eq::{equal, not_equal}
 pub extend MappingIssue with @debug.Debug::{to_repr}
 
 ///|
+#derive(Debug, Eq)
 pub(all) struct MappingDiagnostic {
   path : String
   issue : MappingIssue
   detail : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend MappingDiagnostic with Eq::{equal, not_equal}
@@ -200,13 +210,14 @@ pub extend MappingDiagnostic with @debug.Debug::{to_repr}
 
 ///|
 /// Numeric OCSF classification, present only after a validated OCSF mapping.
+#derive(Debug, Eq)
 pub(all) struct OcsfClassification {
   category_uid : Int32
   class_uid : Int32
   activity_id : Int32
   type_uid : Int32
   severity_id : Int32
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend OcsfClassification with Eq::{equal, not_equal}
@@ -217,6 +228,7 @@ pub extend OcsfClassification with @debug.Debug::{to_repr}
 ///|
 /// Shared event representation; category/class/activity are source-neutral labels,
 /// not an assertion that the record conforms to a particular external schema.
+#derive(Debug, Eq)
 pub(all) struct HostEvent {
   id : EventId
   source : EventSource
@@ -230,7 +242,7 @@ pub(all) struct HostEvent {
   network : NetworkAttributes
   original : OriginalEventReference
   diagnostics : Array[MappingDiagnostic]
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend HostEvent with Eq::{equal, not_equal}

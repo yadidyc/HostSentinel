@@ -1,15 +1,17 @@
 ///|
 /// Evidence categories that can be attached to a security case.
+#derive(Debug, Eq)
 pub(all) enum EvidenceKind {
   Event
   RuleHit
   IocMatch
   AnalystNote
   Artifact
-} derive(Debug, Eq)
+}
 
 ///|
 /// Errors raised while creating or updating a security case.
+#derive(Debug, Eq)
 pub(all) suberror CaseError {
   EmptyCaseId
   EmptyEvidenceId
@@ -21,10 +23,11 @@ pub(all) suberror CaseError {
   InvalidSequence
   DuplicateEvidenceId
   StaleTimestamp
-} derive(Debug, Eq)
+}
 
 ///|
 /// A traceable item of evidence attached to a case.
+#derive(Debug, Eq)
 pub struct Evidence {
   id : String
   kind : EvidenceKind
@@ -32,7 +35,7 @@ pub struct Evidence {
   source : String
   reference : String
   collected_at : ObservedAt
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates validated case evidence.
@@ -104,13 +107,14 @@ pub fn Evidence::collected_at(self : Evidence) -> ObservedAt {
 
 ///|
 /// One immutable entry in a case audit trail.
+#derive(Debug, Eq)
 pub struct AuditEntry {
   sequence : Int32
   actor : String
   action : String
   details : String
   occurred_at : ObservedAt
-} derive(Debug, Eq)
+}
 
 ///|
 /// Creates a validated audit entry with an explicit sequence number.
@@ -171,12 +175,13 @@ pub fn AuditEntry::occurred_at(self : AuditEntry) -> ObservedAt {
 
 ///|
 /// A security investigation case bound to one alert.
+#derive(Debug, Eq)
 pub struct Case {
   id : String
   alert : Alert
   evidence : Array[Evidence]
   audit_trail : Array[AuditEntry]
-} derive(Debug, Eq)
+}
 
 ///|
 /// Opens a case and records its creation in the audit trail.
