@@ -1,7 +1,6 @@
 ///|
 /// A caller-classified event. `event_key` identifies one source record across
 /// roles; `group_key` is the caller's exact correlation scope.
-#derive(Debug, Eq)
 pub(all) struct Hit {
   event_key : String
   role : String
@@ -9,7 +8,7 @@ pub(all) struct Hit {
   time_ms : Int64
   group_key : String
   value : String?
-}
+} derive(Debug, Eq)
 
 ///|
 pub extend Hit with Eq::{equal, not_equal}
@@ -18,13 +17,12 @@ pub extend Hit with Eq::{equal, not_equal}
 pub extend Hit with @debug.Debug::{to_repr}
 
 ///|
-#derive(Debug, Eq)
 pub(all) enum Kind {
   EventCount
   ValueCount
   Temporal
   TemporalOrdered
-}
+} derive(Debug, Eq)
 
 ///|
 pub extend Kind with Eq::{equal, not_equal}
@@ -33,7 +31,6 @@ pub extend Kind with Eq::{equal, not_equal}
 pub extend Kind with @debug.Debug::{to_repr}
 
 ///|
-#derive(Debug, Eq)
 pub(all) enum CountOperator {
   Gt
   Gte
@@ -41,7 +38,7 @@ pub(all) enum CountOperator {
   Lte
   Eq
   Neq
-}
+} derive(Debug, Eq)
 
 ///|
 pub extend CountOperator with Eq::{equal, not_equal}
@@ -52,7 +49,6 @@ pub extend CountOperator with @debug.Debug::{to_repr}
 ///|
 /// A reusable window/aggregation program; event classification and field
 /// extraction are intentionally owned by the caller, not by this package.
-#derive(Debug, Eq)
 pub(all) struct Rule {
   id : String
   kind : Kind
@@ -60,7 +56,7 @@ pub(all) struct Rule {
   window_ms : Int64
   operator : CountOperator?
   threshold : Int32?
-}
+} derive(Debug, Eq)
 
 ///|
 pub extend Rule with Eq::{equal, not_equal}
@@ -69,10 +65,9 @@ pub extend Rule with Eq::{equal, not_equal}
 pub extend Rule with @debug.Debug::{to_repr}
 
 ///|
-#derive(Debug, Eq)
 pub(all) suberror CorrelationError {
   Invalid(String)
-}
+} derive(Debug, Eq)
 
 ///|
 pub extend CorrelationError with Eq::{equal, not_equal}
