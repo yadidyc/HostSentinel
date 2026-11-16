@@ -6,7 +6,7 @@ readme = "README.md"
 
 repository = "https://github.com/yadidyc/HostSentinel"
 
-keywords = [ "security", "threat-hunting", "host-response" ]
+keywords = [ "security", "threat-hunting", "host-response", "sigma", "correlation", "ocsf", "event-correlation" ]
 
 preferred_target = "native"
 
