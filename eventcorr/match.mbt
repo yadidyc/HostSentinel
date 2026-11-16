@@ -250,24 +250,23 @@ pub fn correlate(
   for group_key in keys {
     let group = groups[group_key]
     group.sort_by(hit_order)
-    let mut window_end_idx : Int32 = 0
+    // NOTE: per-start window rebuild is kept for 0.10.17 CI compatibility.
+    // A sliding-window pointer (while loop inside for) triggers a toolchain-
+    // version-specific error on the pinned CI compiler. Once the pinned
+    // version is bumped past 0.10.17, this can be replaced with a two-pointer
+    // approach that avoids allocating a new Array on every iteration.
     for start in 0..<group.length() {
       if rule.kind == Kind::TemporalOrdered &&
         group[start].hit.role != rule.roles[0] {
         continue
       }
       let end_time = window_end(group[start].hit.time_ms, rule.window_ms)
-      // Advance window_end_idx — slides forward, never resets to start.
-      if window_end_idx < start {
-        window_end_idx = start
-      }
-      while window_end_idx < group.length() &&
-            group[window_end_idx].hit.time_ms <= end_time {
-        window_end_idx = window_end_idx + 1
-      }
       let window : Array[IndexedHit] = []
-      for i = start; i < window_end_idx; i = i + 1 {
-        window.push(group[i])
+      for index in start..<group.length() {
+        if group[index].hit.time_ms > end_time {
+          break
+        }
+        window.push(group[index])
       }
       let (selected, actual) = match rule.kind {
         Kind::EventCount | Kind::ValueCount => count_witness(rule, window)
